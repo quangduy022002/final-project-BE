@@ -12,6 +12,7 @@ import { AuthGuardLocal } from '../auth-guard.local';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/user/dtos/create.user.dto';
+import { LoginUserDto } from 'src/user/dtos/login.user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,9 +24,9 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(AuthGuardLocal)
-  async login(@CurrentUser() user: User) {
+  async login(@Body() loginUserDto: LoginUserDto, @CurrentUser() user: User) {
     return {
-      userId: user.id,
+      user: user,
       token: this.authService.getTokenForUser(user),
     };
   }
