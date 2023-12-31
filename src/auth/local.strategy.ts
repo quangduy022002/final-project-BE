@@ -23,13 +23,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = await this.userRepository.findOne({
       where: { username },
     });
-    console.log(user);
+
     if (!user) {
-      throw new BadRequestException(['Wrong username or password!']);
+      throw new UnauthorizedException();
     }
 
     if (!(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException();
+      throw new BadRequestException(['Wrong password!']);
     }
 
     return user;

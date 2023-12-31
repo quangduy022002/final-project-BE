@@ -43,10 +43,12 @@ export class ProjectService {
   public async updateProject(
     project: Project,
     input: CreateProjectDto,
+    user: User,
   ): Promise<Project> {
     return await this.projectRepository.save({
       ...project,
       ...input,
+      createdBy: user,
     });
   }
 
@@ -56,5 +58,17 @@ export class ProjectService {
       .delete()
       .where('id = :id', { id })
       .execute();
+  }
+
+  public async assignMemberToProject(
+    assignMember: User,
+    project: Project,
+    user: User,
+  ): Promise<Project> {
+    return await this.projectRepository.save({
+      ...project,
+      createdBy: user,
+      teamUsers: [...project.teamUsers, assignMember],
+    });
   }
 }

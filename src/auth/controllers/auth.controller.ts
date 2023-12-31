@@ -24,7 +24,9 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(AuthGuardLocal)
-  async login(@Body() loginUserDto: LoginUserDto, @CurrentUser() user: User) {
+  async login(@CurrentUser() user: User, @Body() loginUserDto: LoginUserDto) {
+    console.log(loginUserDto);
+    console.log(user, 'user');
     return {
       user: user,
       token: this.authService.getTokenForUser(user),

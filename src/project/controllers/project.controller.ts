@@ -34,10 +34,9 @@ export class ProjectController {
   }
 
   @Post('create')
-  @UseGuards(AuthGuardJwt)
   @ApiBearerAuth()
+  @UseGuards(AuthGuardJwt)
   async create(@Body() input: CreateProjectDto, @CurrentUser() user: User) {
-    console.log(user);
     return await this.projectService.createProject(input, user);
   }
 
@@ -47,14 +46,18 @@ export class ProjectController {
   @ApiParam({
     name: 'id',
   })
-  async update(@Param('id') id, @Body() input: CreateProjectDto) {
+  async update(
+    @Param('id') id,
+    @Body() input: CreateProjectDto,
+    @CurrentUser() user: User,
+  ) {
     const project = await this.projectService.getProjectDetail(id);
 
     if (!project) {
       throw new NotFoundException();
     }
 
-    return await this.projectService.updateProject(project, input);
+    return await this.projectService.updateProject(project, input, user);
   }
 
   @Delete('remove/:id')
@@ -71,5 +74,29 @@ export class ProjectController {
     }
 
     return await this.projectService.deleteProject(id);
+  }
+
+  @Post('assignMemberToProject')
+  @UseGuards(AuthGuardJwt)
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'id',
+  })
+  async assignMemberProject(
+    @Param('id') id,
+    @Body() member: User,
+    @CurrentUser() user: User,
+  ) {
+    const project = await this.projectService.getProjectDetail(id);
+
+    if (!project) {
+      throw new NotFoundException();
+    }
+
+    return await this.projectService.assignMemberToProject(
+      member,
+      project,
+      user,
+    );
   }
 }
