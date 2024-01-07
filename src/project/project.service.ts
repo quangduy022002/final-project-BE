@@ -4,12 +4,14 @@ import { Project } from './entity/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProjectDto } from './dtos/create.project.dto';
 import { User } from 'src/user/entity/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    private readonly userService: UserService,
   ) {}
 
   private getProjectsBaseQuery() {
@@ -61,14 +63,26 @@ export class ProjectService {
   }
 
   public async assignMemberToProject(
-    assignMember: User,
+    memberId: string,
     project: Project,
     user: User,
   ): Promise<Project> {
+    const member = await this.userService.getUser(memberId);
+
+    console.log(member);
+    const updatedTeamUsers: Array<User> = [...project.teamUsers];
+    if (
+      !updatedTeamUsers.some(
+        (existingMember: User) => existingMember.id === member.id,
+      )
+    ) {
+      updatedTeamUsers.push(member);
+    }
+
     return await this.projectRepository.save({
       ...project,
+      teamUsers: updatedTeamUsers,
       createdBy: user,
-      teamUsers: [...project.teamUsers, assignMember],
     });
   }
 }

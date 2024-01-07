@@ -18,7 +18,7 @@ export class UserService {
     return await this.getUsersBaseQuery().getMany();
   }
 
-  public async getUser(id: number): Promise<User | undefined> {
+  public async getUser(id: string): Promise<User | undefined> {
     const query = await this.getUsersBaseQuery().andWhere('e.id = :id', { id });
 
     return query.getOne();

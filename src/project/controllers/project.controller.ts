@@ -84,7 +84,7 @@ export class ProjectController {
   })
   async assignMemberProject(
     @Param('id') id,
-    @Body() member: User,
+    @Body() memberId: string,
     @CurrentUser() user: User,
   ) {
     const project = await this.projectService.getProjectDetail(id);
@@ -94,7 +94,7 @@ export class ProjectController {
     }
 
     return await this.projectService.assignMemberToProject(
-      member,
+      memberId,
       project,
       user,
     );
