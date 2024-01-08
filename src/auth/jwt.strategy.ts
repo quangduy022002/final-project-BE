@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwtGate') {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -14,7 +14,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'secret123',
+      secretOrKey: process.env.AUTH_SECRET,
+    });
+  }
+
+  async validate(payload: any) {
+    return await this.userRepository.findOne({
+      where: {
+        id: payload.sub,
+      },
     });
   }
 }

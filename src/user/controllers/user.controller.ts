@@ -1,12 +1,21 @@
-import { AuthService } from 'src/auth/auth.service';
-import { Repository } from 'typeorm';
-import { User } from '../entity/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Controller, Get, Param } from '@nestjs/common';
+import { UserService } from '../user.service';
+import { ApiParam } from '@nestjs/swagger';
 
+@Controller('users')
 export class UserController {
-  constructor(
-    private readonly authService: AuthService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly userService: UserService) {}
+
+  @Get('getAll')
+  async findAll() {
+    return this.userService.getAllUsers();
+  }
+
+  @Get(':id')
+  @ApiParam({
+    name: 'id',
+  })
+  async getUserDetail(@Param('id') id) {
+    return await this.userService.getUser(id);
+  }
 }
