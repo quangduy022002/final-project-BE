@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProjectDto } from './dtos/create.project.dto';
 import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
+import { AssignUserProjectDto } from './dtos/assign.user.project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -38,7 +39,7 @@ export class ProjectService {
   ): Promise<Project> {
     return await this.projectRepository.save({
       ...input,
-      createdBy: user,
+      createdBy: user.id,
     });
   }
 
@@ -50,7 +51,7 @@ export class ProjectService {
     return await this.projectRepository.save({
       ...project,
       ...input,
-      createdBy: user,
+      createdBy: user.id,
     });
   }
 
@@ -63,26 +64,25 @@ export class ProjectService {
   }
 
   public async assignMemberToProject(
-    memberId: string,
+    memberId: AssignUserProjectDto,
     project: Project,
     user: User,
   ): Promise<Project> {
-    const member = await this.userService.getUser(memberId);
+    const member = await this.userService.getUser(memberId.userId);
 
-    console.log(member);
-    const updatedTeamUsers: Array<User> = [...project.teamUsers];
+    const updatedTeamUsers: Array<string> = [...project.teamUsers];
     if (
       !updatedTeamUsers.some(
-        (existingMember: User) => existingMember.id === member.id,
+        (existingMember: string) => existingMember === member.id,
       )
     ) {
-      updatedTeamUsers.push(member);
+      updatedTeamUsers.push(member.id);
     }
 
     return await this.projectRepository.save({
       ...project,
       teamUsers: updatedTeamUsers,
-      createdBy: user,
+      createdBy: user.id,
     });
   }
 }

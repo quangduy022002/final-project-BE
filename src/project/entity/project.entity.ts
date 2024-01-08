@@ -1,11 +1,10 @@
-import { Section } from 'src/section/entity/section.entity';
 import { User } from 'src/user/entity/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Project {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
@@ -17,11 +16,11 @@ export class Project {
   category: string;
 
   @Column('simple-array')
-  sections: Section[];
+  sections: number[];
 
   @Column('simple-array')
-  teamUsers: User[];
+  teamUsers: string[];
 
   @ManyToOne(() => User, (user) => user.id)
-  createdBy?: User;
+  createdBy?: string;
 }

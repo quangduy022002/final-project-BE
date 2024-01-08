@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { CreateProjectDto } from '../dtos/create.project.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
+import { AssignUserProjectDto } from '../dtos/assign.user.project.dto';
 
 @Controller('/projects')
 export class ProjectController {
@@ -76,7 +77,7 @@ export class ProjectController {
     return await this.projectService.deleteProject(id);
   }
 
-  @Post('assignMemberToProject')
+  @Post('assignMemberToProject/:id')
   @UseGuards(AuthGuardJwt)
   @ApiBearerAuth()
   @ApiParam({
@@ -84,7 +85,7 @@ export class ProjectController {
   })
   async assignMemberProject(
     @Param('id') id,
-    @Body() memberId: string,
+    @Body() memberId: AssignUserProjectDto,
     @CurrentUser() user: User,
   ) {
     const project = await this.projectService.getProjectDetail(id);

@@ -1,6 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Section } from 'src/section/entity/section.entity';
-import { User } from 'src/user/entity/user.entity';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -14,8 +12,9 @@ export class CreateProjectDto {
   category: string;
 
   @IsOptional()
-  sections: Section[];
+  @IsArray()
+  sections: number[];
 
   @IsNotEmpty()
-  teamUsers: User[];
+  teamUsers: string[];
 }
