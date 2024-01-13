@@ -21,5 +21,5 @@ export class User {
   email: string;
 
   @OneToMany(() => Project, (project) => project.id)
-  ownerProject?: Project[];
+  ownerProject?: string[];
 }

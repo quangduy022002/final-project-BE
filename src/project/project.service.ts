@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { Project } from './entity/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,12 +6,15 @@ import { CreateProjectDto } from './dtos/create.project.dto';
 import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AssignUserProjectDto } from './dtos/assign.user.project.dto';
+import { SectionService } from 'src/section/section.service';
+import { Section } from 'src/section/entity/section.entity';
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    private readonly sectionService: SectionService,
     private readonly userService: UserService,
   ) {}
 
@@ -25,20 +28,38 @@ export class ProjectService {
     return await this.getProjectsBaseQuery().getMany();
   }
 
-  public async getProjectDetail(id: number): Promise<Project | undefined> {
+  public async getProjectDetail(id: number): Promise<Project> {
     const query = await this.getProjectsBaseQuery().andWhere('e.id = :id', {
       id,
     });
-
-    return await query.getOne();
+    const project = await query.getOne();
+    if (project) {
+      const sectionsPromises: Promise<Section>[] = project.sections.map(
+        async (section: Section) => {
+          return await this.sectionService.getSection(section.id);
+        },
+      );
+      const sections: Section[] = await Promise.all(sectionsPromises);
+      return { ...project, sections };
+    } else {
+      throw new NotFoundException();
+    }
   }
 
   public async createProject(
     input: CreateProjectDto,
     user: User,
   ): Promise<Project> {
+    const sectionsPromises: Promise<Section>[] = input.sections.map(
+      async (sectionId: number) => {
+        return await this.sectionService.getSection(sectionId);
+      },
+    );
+    const sections: Section[] = await Promise.all(sectionsPromises);
+
     return await this.projectRepository.save({
       ...input,
+      sections,
       createdBy: user.id,
     });
   }
@@ -48,9 +69,16 @@ export class ProjectService {
     input: CreateProjectDto,
     user: User,
   ): Promise<Project> {
+    const sectionsPromises: Promise<Section>[] = input.sections.map(
+      async (sectionId: number) => {
+        return await this.sectionService.getSection(sectionId);
+      },
+    );
+    const sections: Section[] = await Promise.all(sectionsPromises);
     return await this.projectRepository.save({
       ...project,
       ...input,
+      sections,
       createdBy: user.id,
     });
   }
@@ -78,9 +106,15 @@ export class ProjectService {
     ) {
       updatedTeamUsers.push(member.id);
     }
-
+    const sectionsPromises: Promise<Section>[] = project.sections.map(
+      async (section: Section) => {
+        return await this.sectionService.getSection(section.id);
+      },
+    );
+    const sections: Section[] = await Promise.all(sectionsPromises);
     return await this.projectRepository.save({
       ...project,
+      sections,
       teamUsers: updatedTeamUsers,
       createdBy: user.id,
     });

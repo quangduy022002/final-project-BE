@@ -1,3 +1,4 @@
+import { Section } from 'src/section/entity/section.entity';
 import { User } from 'src/user/entity/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -15,8 +16,10 @@ export class Project {
   @Column()
   category: string;
 
-  @Column('simple-array')
-  sections: number[];
+  // @Column('simple-array')
+  // sections: number[];
+  @Column({ type: 'json', nullable: true })
+  sections: Section[] | null;
 
   @Column('simple-array')
   teamUsers: string[];
