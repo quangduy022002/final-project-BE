@@ -13,6 +13,9 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/user/dtos/create.user.dto';
 import { LoginUserDto } from 'src/user/dtos/login.user.dto';
+import { EmailUserDto } from 'src/user/dtos/email.user.dto';
+import { CodeAuthDto } from '../dtos/code.auth.dto';
+import { PasswordUserDto } from 'src/user/dtos/password.user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,9 +27,8 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(AuthGuardLocal)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async login(@CurrentUser() user: User, @Body() loginUserDto: LoginUserDto) {
-    console.log(loginUserDto);
-    console.log(user, 'user');
     return {
       user: user,
       token: this.authService.getTokenForUser(user),
@@ -64,5 +66,25 @@ export class AuthController {
       ...(await this.userRepository.save(user)),
       token: this.authService.getTokenForUser(user),
     };
+  }
+
+  @Post('sendCode')
+  async sendCodeResetPassword(@Body() payload: EmailUserDto) {
+    return await this.authService.sendCodeResetPassword(payload.email);
+  }
+
+  @Post('checkCode')
+  async checkCode(@Body() payload: CodeAuthDto) {
+    return await this.authService.checkCode(payload.code);
+  }
+
+  @Post('resetPassword')
+  async resetPassword(@Body() { password, rePassword }: PasswordUserDto) {
+    if (password !== rePassword)
+      throw new BadRequestException(['Re-password is not same !']);
+
+    const hashPass = await this.authService.hashPassword(password);
+
+    return this.authService.resetPassword(hashPass);
   }
 }

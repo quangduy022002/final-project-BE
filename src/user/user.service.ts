@@ -23,4 +23,12 @@ export class UserService {
 
     return query.getOne();
   }
+
+  public async getUserByEmail(email: string): Promise<User | undefined> {
+    const query = await this.getUsersBaseQuery().andWhere('e.email = :email', {
+      email,
+    });
+
+    return query.getOne();
+  }
 }
