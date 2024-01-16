@@ -13,7 +13,10 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CodeAuthRequest } from '../dtos/code.auth.dto';
 import { LoginUserRequest } from 'src/user/dtos/login.user.dto';
-import { CreateUserRequest } from 'src/user/dtos/create.user.dto';
+import {
+  CreateUserRequest,
+  CreateUserResponse,
+} from 'src/user/dtos/create.user.dto';
 import { EmailUserRequest } from 'src/user/dtos/email.user.dto';
 import { PasswordUserRequest } from 'src/user/dtos/password.user.dto';
 
@@ -32,14 +35,23 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() loginUserRequest: LoginUserRequest,
   ) {
+    const userInfo: CreateUserResponse = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
     return {
-      user: user,
+      user: userInfo,
       token: this.authService.getTokenForUser(user),
     };
   }
 
   @Post('createUser')
-  async createUser(@Body() createUserRequest: CreateUserRequest) {
+  async createUser(
+    @Body() createUserRequest: CreateUserRequest,
+  ): Promise<CreateUserResponse> {
     const user = new User();
 
     if (createUserRequest.password !== createUserRequest.retypedPassword) {
@@ -67,9 +79,16 @@ export class AuthController {
     user.firstName = createUserRequest.firstName;
     user.lastName = createUserRequest.lastName;
 
+    const savedUser = await this.userRepository.save(user);
+    const token = this.authService.getTokenForUser(user);
+
     return {
-      ...(await this.userRepository.save(user)),
-      token: this.authService.getTokenForUser(user),
+      id: savedUser.id,
+      username: savedUser.username,
+      email: savedUser.email,
+      firstName: savedUser.firstName,
+      lastName: savedUser.lastName,
+      token,
     };
   }
 

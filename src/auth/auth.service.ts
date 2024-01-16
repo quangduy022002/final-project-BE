@@ -6,6 +6,7 @@ import nodemailer from 'nodemailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
+import { CreateUserResponse } from 'src/user/dtos/create.user.dto';
 @Injectable()
 export class AuthService {
   private code: number;
@@ -70,15 +71,23 @@ export class AuthService {
     return true;
   }
 
-  public async resetPassword(password: string): Promise<User> {
+  public async resetPassword(password: string): Promise<CreateUserResponse> {
     const user = await this.userService.getUserByEmail(this.email);
 
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    return await this.userRepository.save({
+    const userAfterResetPass = await this.userRepository.save({
       ...user,
       password,
     });
+
+    return {
+      id: userAfterResetPass.id,
+      username: userAfterResetPass.username,
+      email: userAfterResetPass.email,
+      firstName: userAfterResetPass.firstName,
+      lastName: userAfterResetPass.lastName,
+    };
   }
 }

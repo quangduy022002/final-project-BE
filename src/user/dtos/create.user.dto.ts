@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class CreateUserRequest {
   @Length(5)
@@ -24,4 +24,28 @@ export class CreateUserRequest {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+}
+
+export class CreateUserResponse {
+  @IsString()
+  id: string;
+
+  @Length(5)
+  @IsNotEmpty()
+  username: string;
+
+  @Length(2)
+  @IsNotEmpty()
+  firstName: string;
+
+  @Length(2)
+  @IsNotEmpty()
+  lastName: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  token?: string;
 }
