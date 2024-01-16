@@ -2,12 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { Project } from './entity/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateProjectDto } from './dtos/create.project.dto';
 import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
-import { AssignUserProjectDto } from './dtos/assign.user.project.dto';
 import { SectionService } from 'src/section/section.service';
 import { Section } from 'src/section/entity/section.entity';
+import { CreateProjectRequest } from './dtos/create.project.dto';
+import { AssignUserProjectRequest } from './dtos/assign.user.project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -47,7 +47,7 @@ export class ProjectService {
   }
 
   public async createProject(
-    input: CreateProjectDto,
+    input: CreateProjectRequest,
     user: User,
   ): Promise<Project> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
@@ -66,7 +66,7 @@ export class ProjectService {
 
   public async updateProject(
     project: Project,
-    input: CreateProjectDto,
+    input: CreateProjectRequest,
     user: User,
   ): Promise<Project> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
@@ -92,7 +92,7 @@ export class ProjectService {
   }
 
   public async assignMemberToProject(
-    memberId: AssignUserProjectDto,
+    memberId: AssignUserProjectRequest,
     project: Project,
     user: User,
   ): Promise<Project> {

@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class CreateSectionDto {
+export class CreateSectionRequest {
   @IsString()
   title: string;
 }

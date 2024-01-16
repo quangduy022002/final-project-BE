@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { Section } from './entity/section.entity';
-import { CreateSectionDto } from './dtos/create.section.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateSectionRequest } from './dtos/create.section.dto';
 
 @Injectable()
 export class SectionService {
@@ -29,7 +29,7 @@ export class SectionService {
     return await query.getOne();
   }
 
-  public async createSection(input: CreateSectionDto): Promise<Section> {
+  public async createSection(input: CreateSectionRequest): Promise<Section> {
     return await this.sectionRepository.save({
       ...input,
     });
@@ -37,7 +37,7 @@ export class SectionService {
 
   public async updateSection(
     section: Section,
-    input: CreateSectionDto,
+    input: CreateSectionRequest,
   ): Promise<Section> {
     return await this.sectionRepository.save({
       ...section,

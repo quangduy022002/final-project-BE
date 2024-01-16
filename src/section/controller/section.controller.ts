@@ -10,8 +10,8 @@ import {
   Post,
 } from '@nestjs/common';
 import { SectionService } from '../section.service';
-import { CreateSectionDto } from '../dtos/create.section.dto';
 import { ApiParam } from '@nestjs/swagger';
+import { CreateSectionRequest } from '../dtos/create.section.dto';
 
 @Controller('/sections')
 export class SectionController {
@@ -23,7 +23,7 @@ export class SectionController {
   }
 
   @Post('create')
-  async create(@Body() input: CreateSectionDto) {
+  async create(@Body() input: CreateSectionRequest) {
     return await this.sectionService.createSection(input);
   }
 
@@ -31,7 +31,7 @@ export class SectionController {
   @ApiParam({
     name: 'id',
   })
-  async update(@Param('id') id, @Body() input: CreateSectionDto) {
+  async update(@Param('id') id, @Body() input: CreateSectionRequest) {
     const section = await this.sectionService.getSection(id);
 
     if (!section) {

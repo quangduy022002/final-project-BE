@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class AssignUserProjectDto {
+export class AssignUserProjectRequest {
   @IsString()
   @IsNotEmpty()
   userId: string;

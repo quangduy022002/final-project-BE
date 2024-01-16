@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class PasswordUserDto {
+export class PasswordUserRequest {
   @IsString()
   @Length(8)
   @IsNotEmpty()

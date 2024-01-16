@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CodeAuthDto {
+export class CodeAuthRequest {
   @IsNumber()
   @IsNotEmpty()
   code: number;

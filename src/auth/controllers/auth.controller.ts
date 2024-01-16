@@ -11,11 +11,11 @@ import { User } from 'src/user/entity/user.entity';
 import { AuthGuardLocal } from '../auth-guard.local';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from 'src/user/dtos/create.user.dto';
-import { LoginUserDto } from 'src/user/dtos/login.user.dto';
-import { EmailUserDto } from 'src/user/dtos/email.user.dto';
-import { CodeAuthDto } from '../dtos/code.auth.dto';
-import { PasswordUserDto } from 'src/user/dtos/password.user.dto';
+import { CodeAuthRequest } from '../dtos/code.auth.dto';
+import { LoginUserRequest } from 'src/user/dtos/login.user.dto';
+import { CreateUserRequest } from 'src/user/dtos/create.user.dto';
+import { EmailUserRequest } from 'src/user/dtos/email.user.dto';
+import { PasswordUserRequest } from 'src/user/dtos/password.user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,8 +27,11 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(AuthGuardLocal)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async login(@CurrentUser() user: User, @Body() loginUserDto: LoginUserDto) {
+  async login(
+    @CurrentUser() user: User,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() loginUserRequest: LoginUserRequest,
+  ) {
     return {
       user: user,
       token: this.authService.getTokenForUser(user),
@@ -36,10 +39,10 @@ export class AuthController {
   }
 
   @Post('createUser')
-  async createUser(@Body() createUserDto: CreateUserDto) {
+  async createUser(@Body() createUserRequest: CreateUserRequest) {
     const user = new User();
 
-    if (createUserDto.password !== createUserDto.retypedPassword) {
+    if (createUserRequest.password !== createUserRequest.retypedPassword) {
       throw new BadRequestException([
         'Re-password is not the same as password!',
       ]);
@@ -47,8 +50,8 @@ export class AuthController {
 
     const existingUser = await this.userRepository.findOne({
       where: [
-        { username: createUserDto.username },
-        { email: createUserDto.email },
+        { username: createUserRequest.username },
+        { email: createUserRequest.email },
       ],
     });
 
@@ -56,11 +59,13 @@ export class AuthController {
       throw new BadRequestException(['Username or Email is existed!']);
     }
 
-    user.username = createUserDto.username;
-    user.password = await this.authService.hashPassword(createUserDto.password);
-    user.email = createUserDto.email;
-    user.firstName = createUserDto.firstName;
-    user.lastName = createUserDto.lastName;
+    user.username = createUserRequest.username;
+    user.password = await this.authService.hashPassword(
+      createUserRequest.password,
+    );
+    user.email = createUserRequest.email;
+    user.firstName = createUserRequest.firstName;
+    user.lastName = createUserRequest.lastName;
 
     return {
       ...(await this.userRepository.save(user)),
@@ -69,17 +74,17 @@ export class AuthController {
   }
 
   @Post('sendCode')
-  async sendCodeResetPassword(@Body() payload: EmailUserDto) {
+  async sendCodeResetPassword(@Body() payload: EmailUserRequest) {
     return await this.authService.sendCodeResetPassword(payload.email);
   }
 
   @Post('checkCode')
-  async checkCode(@Body() payload: CodeAuthDto) {
+  async checkCode(@Body() payload: CodeAuthRequest) {
     return await this.authService.checkCode(payload.code);
   }
 
   @Post('resetPassword')
-  async resetPassword(@Body() { password, rePassword }: PasswordUserDto) {
+  async resetPassword(@Body() { password, rePassword }: PasswordUserRequest) {
     if (password !== rePassword)
       throw new BadRequestException(['Re-password is not same !']);
 

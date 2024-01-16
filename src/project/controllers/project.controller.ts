@@ -12,10 +12,10 @@ import {
 import { ProjectService } from '../project.service';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
-import { CreateProjectDto } from '../dtos/create.project.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
-import { AssignUserProjectDto } from '../dtos/assign.user.project.dto';
+import { CreateProjectRequest } from '../dtos/create.project.dto';
+import { AssignUserProjectRequest } from '../dtos/assign.user.project.dto';
 
 @Controller('/projects')
 export class ProjectController {
@@ -37,7 +37,7 @@ export class ProjectController {
   @Post('create')
   @ApiBearerAuth()
   @UseGuards(AuthGuardJwt)
-  async create(@Body() input: CreateProjectDto, @CurrentUser() user: User) {
+  async create(@Body() input: CreateProjectRequest, @CurrentUser() user: User) {
     return await this.projectService.createProject(input, user);
   }
 
@@ -49,7 +49,7 @@ export class ProjectController {
   })
   async update(
     @Param('id') id,
-    @Body() input: CreateProjectDto,
+    @Body() input: CreateProjectRequest,
     @CurrentUser() user: User,
   ) {
     const project = await this.projectService.getProjectDetail(id);
@@ -85,7 +85,7 @@ export class ProjectController {
   })
   async assignMemberProject(
     @Param('id') id,
-    @Body() memberId: AssignUserProjectDto,
+    @Body() memberId: AssignUserProjectRequest,
     @CurrentUser() user: User,
   ) {
     const project = await this.projectService.getProjectDetail(id);
