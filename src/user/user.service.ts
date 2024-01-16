@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateUserResponse } from './dtos/create.user.dto';
 
 @Injectable()
 export class UserService {
@@ -14,21 +15,48 @@ export class UserService {
     return this.userRepository.createQueryBuilder('e').orderBy('e.id', 'DESC');
   }
 
-  public async getAllUsers() {
-    return await this.getUsersBaseQuery().getMany();
-  }
-
-  public async getUser(id: string): Promise<User | undefined> {
-    const query = await this.getUsersBaseQuery().andWhere('e.id = :id', { id });
-
-    return query.getOne();
-  }
-
-  public async getUserByEmail(email: string): Promise<User | undefined> {
-    const query = await this.getUsersBaseQuery().andWhere('e.email = :email', {
-      email,
+  public async getAllUsers(): Promise<CreateUserResponse[]> {
+    const userList = await this.getUsersBaseQuery().getMany();
+    return userList.map((user) => {
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      };
     });
+  }
 
-    return query.getOne();
+  public async getUser(id: string): Promise<CreateUserResponse | undefined> {
+    const user = await this.getUsersBaseQuery()
+      .andWhere('e.id = :id', { id })
+      .getOne();
+
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  }
+
+  public async getUserByEmail(
+    email: string,
+  ): Promise<CreateUserResponse | undefined> {
+    const user = await this.getUsersBaseQuery()
+      .andWhere('e.email = :email', {
+        email,
+      })
+      .getOne();
+
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
   }
 }
