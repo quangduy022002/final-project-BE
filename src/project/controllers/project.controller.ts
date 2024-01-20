@@ -16,6 +16,10 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
 import { CreateProjectRequest } from '../dtos/create.project.dto';
 import { AssignUserProjectRequest } from '../dtos/assign.user.project.dto';
+import {
+  InviteUserProjectRequest,
+  InviteUserProjectResponse,
+} from '../dtos/invite.user.project.dto';
 
 @Controller('/projects')
 export class ProjectController {
@@ -99,5 +103,21 @@ export class ProjectController {
       project,
       user,
     );
+  }
+
+  @Post('sendInviteUser')
+  @UseGuards(AuthGuardJwt)
+  @ApiBearerAuth()
+  async inviteUser(
+    @Body() payload: InviteUserProjectRequest,
+  ): Promise<boolean> {
+    return await this.projectService.inviteUser(payload);
+  }
+
+  @Post('acceptInvite')
+  async acceptInvite(
+    @Body() payload: InviteUserProjectRequest,
+  ): Promise<InviteUserProjectResponse> {
+    return await this.projectService.acceptInvite(payload);
   }
 }
