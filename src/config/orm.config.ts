@@ -14,6 +14,6 @@ export default registerAs(
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: [User, Section, Project],
-    synchronize: true, //change directive DB
+    synchronize: false, //change directive DB
   }),
 );
