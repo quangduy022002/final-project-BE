@@ -64,10 +64,11 @@ export class CommentService {
       updatedAt: new Date(),
       createdBy: user,
     });
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...info } = user;
     return {
       ...createdComment,
-      createdBy: user.id,
+      createdBy: info,
     };
   }
 
@@ -85,10 +86,11 @@ export class CommentService {
         updatedAt,
         createdBy: user,
       });
-
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...info } = user;
       return {
         ...updatedComment,
-        createdBy: user.id,
+        createdBy: info,
       };
     }
     throw new BadRequestException('You can not update this comment');

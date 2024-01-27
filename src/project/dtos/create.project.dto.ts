@@ -1,5 +1,6 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Section } from 'src/section/entity/section.entity';
+import { CreateUserResponse } from 'src/user/dtos/create.user.dto';
 
 export class CreateProjectRequest {
   @IsString()
@@ -31,7 +32,7 @@ export class CreateProjectResponse {
 
   sections: Array<Section>;
 
-  teamUsers: Array<string>;
+  teamUsers: Array<CreateUserResponse>;
 
-  createdBy: string;
+  createdBy: CreateUserResponse;
 }

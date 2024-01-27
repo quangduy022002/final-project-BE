@@ -25,8 +25,8 @@ export class Project {
   @Column({ type: 'json', nullable: true })
   sections: Section[] | null;
 
-  @Column('simple-array')
-  teamUsers: string[];
+  @Column({ type: 'json', nullable: true })
+  teamUsers: User[] | null;
 
   @OneToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'createdBy' })

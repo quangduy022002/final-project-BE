@@ -1,8 +1,10 @@
+import { Task } from 'src/task/entity/task.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -24,4 +26,8 @@ export class Comment {
 
   @Column()
   updatedAt?: Date;
+
+  @OneToMany(() => Task, (task) => task.id)
+  @JoinColumn({ name: 'belongTo' })
+  belongTo: Task;
 }

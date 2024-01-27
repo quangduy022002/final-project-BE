@@ -116,6 +116,30 @@ export class ProjectController {
     );
   }
 
+  @Post('removeMemberFromProject/:id')
+  @UseGuards(AuthGuardJwt)
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'id',
+  })
+  async removeMember(
+    @Param('id') id,
+    @Body() memberId: AssignUserProjectRequest,
+    @CurrentUser() user: User,
+  ): Promise<CreateProjectResponse> {
+    const project = await this.projectService.getProjectDetail(id);
+
+    if (!project) {
+      throw new NotFoundException();
+    }
+
+    return await this.projectService.removeMemberToProject(
+      memberId,
+      project,
+      user,
+    );
+  }
+
   @Post('sendInviteUser')
   @UseGuards(AuthGuardJwt)
   @ApiBearerAuth()

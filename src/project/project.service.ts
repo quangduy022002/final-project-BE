@@ -37,17 +37,46 @@ export class ProjectService {
       .orderBy('e.id', 'DESC');
   }
 
-  private updateTeamUser(project: Project, member: CreateUserResponse) {
-    const updatedTeamUsers: Array<string> = [...project.teamUsers];
-    if (
-      !updatedTeamUsers.some(
-        (existingMember: string) => existingMember === member.id,
-      )
-    ) {
-      updatedTeamUsers.push(member.id);
-    }
+  private async mapTeamUsers(data): Promise<CreateUserResponse[]> {
+    const teamUserPromise: Promise<CreateUserResponse>[] = data.map(
+      async (user: User) => {
+        return await this.userService.getUser(user.id);
+      },
+    );
 
-    return updatedTeamUsers;
+    const teamUsers: CreateUserResponse[] = await Promise.all(teamUserPromise);
+
+    return teamUsers;
+  }
+
+  private async updateTeamUser(
+    project: Project,
+    member: CreateUserResponse,
+    flag: string = '',
+  ): Promise<Array<CreateUserResponse>> {
+    const updatedTeamUsers: Array<CreateUserResponse> = [...project.teamUsers];
+    if (!flag) {
+      if (
+        !updatedTeamUsers.some(
+          (existingMember: User) => existingMember.id === member.id,
+        )
+      ) {
+        updatedTeamUsers.push(member);
+      }
+
+      const teamUsers = await this.mapTeamUsers(updatedTeamUsers);
+      return teamUsers;
+    } else {
+      if (
+        updatedTeamUsers.some(
+          (existingMember: User) => existingMember.id === member.id,
+        )
+      ) {
+        return updatedTeamUsers.filter((user: User) => user.id !== member.id);
+      } else {
+        throw new BadRequestException('Member is not founded in project!');
+      }
+    }
   }
 
   public async getAllProjects(): Promise<Project[]> {
@@ -101,17 +130,15 @@ export class ProjectService {
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
-
-    const result = await this.projectRepository.save({
+    const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...info } = user;
+    return await this.projectRepository.save({
       ...input,
+      teamUsers,
       sections,
-      createdBy: user,
+      createdBy: info,
     });
-
-    return {
-      ...result,
-      createdBy: user.id,
-    };
   }
 
   public async updateProject(
@@ -125,17 +152,20 @@ export class ProjectService {
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
-
+    const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...info } = user;
     if (project.createdBy.id === user.id) {
       const result = await this.projectRepository.save({
         ...project,
         ...input,
+        teamUsers,
         sections,
         createdBy: user,
       });
       return {
         ...result,
-        createdBy: user.id,
+        createdBy: info,
       };
     }
 
@@ -167,13 +197,15 @@ export class ProjectService {
       throw new BadRequestException('User not found');
     }
 
-    const updatedTeamUsers = this.updateTeamUser(project, member);
+    const updatedTeamUsers = await this.updateTeamUser(project, member);
     const sectionsPromises: Promise<Section>[] = project.sections.map(
       async (section: Section) => {
         return await this.sectionService.getSection(section.id);
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...info } = user;
     const result = await this.projectRepository.save({
       ...project,
       sections,
@@ -182,7 +214,42 @@ export class ProjectService {
     });
     return {
       ...result,
-      createdBy: user.id,
+      createdBy: info,
+    };
+  }
+
+  public async removeMemberToProject(
+    memberId: AssignUserProjectRequest,
+    project: Project,
+    user: User,
+  ): Promise<CreateProjectResponse> {
+    const member = await this.userService.getUser(memberId.userId);
+
+    if (!member) {
+      throw new BadRequestException('User not found');
+    }
+    const updatedTeamUsers = await this.updateTeamUser(
+      project,
+      member,
+      'remove',
+    );
+    const sectionsPromises: Promise<Section>[] = project.sections.map(
+      async (section: Section) => {
+        return await this.sectionService.getSection(section.id);
+      },
+    );
+    const sections: Section[] = await Promise.all(sectionsPromises);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...info } = user;
+    const result = await this.projectRepository.save({
+      ...project,
+      sections,
+      teamUsers: updatedTeamUsers,
+      createdBy: user,
+    });
+    return {
+      ...result,
+      createdBy: info,
     };
   }
 
@@ -239,7 +306,7 @@ export class ProjectService {
     const member = await this.userService.getUserByEmail(payload.email);
     const project = await this.getProjectDetail(payload.projectId);
 
-    const updatedTeamUsers = this.updateTeamUser(project, member);
+    const updatedTeamUsers = await this.updateTeamUser(project, member);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updatedProject = await this.projectRepository.save({

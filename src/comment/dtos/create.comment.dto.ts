@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { CreateUserResponse } from 'src/user/dtos/create.user.dto';
 
 export class CreateCommentRequest {
   @IsNotEmpty()
@@ -10,7 +11,7 @@ export class CreateCommentResponse {
 
   content: string;
 
-  createdBy: string;
+  createdBy: CreateUserResponse;
 
   createdAt?: Date;
 
