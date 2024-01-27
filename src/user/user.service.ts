@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,6 +33,9 @@ export class UserService {
       .andWhere('e.id = :id', { id })
       .getOne();
 
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
     return {
       id: user.id,
       username: user.username,

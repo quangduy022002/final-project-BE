@@ -7,8 +7,11 @@ import { SectionModule } from './section/section.module';
 import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { ConfigModule } from '@nestjs/config';
+import { TaskModule } from './task/task.module';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
+import { PriorityModule } from './priority/priority.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import ormConfigProd from './config/orm.config.prod';
     SectionModule,
     UserModule,
     ProjectModule,
+    TaskModule,
+    PriorityModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

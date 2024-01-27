@@ -10,7 +10,10 @@ import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
 import { SectionService } from 'src/section/section.service';
 import { Section } from 'src/section/entity/section.entity';
-import { CreateProjectRequest } from './dtos/create.project.dto';
+import {
+  CreateProjectRequest,
+  CreateProjectResponse,
+} from './dtos/create.project.dto';
 import { AssignUserProjectRequest } from './dtos/assign.user.project.dto';
 import {
   InviteUserProjectRequest,
@@ -47,32 +50,51 @@ export class ProjectService {
     return updatedTeamUsers;
   }
 
-  public async getAllProjects() {
-    return await this.getProjectsBaseQuery().getMany();
+  public async getAllProjects(): Promise<Project[]> {
+    return await this.getProjectsBaseQuery()
+      .leftJoin('e.createdBy', 'user')
+      .addSelect([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+      ])
+      .getMany();
   }
 
   public async getProjectDetail(id: string): Promise<Project> {
-    const query = await this.getProjectsBaseQuery().andWhere('e.id = :id', {
-      id,
-    });
+    const query = await this.getProjectsBaseQuery()
+      .leftJoin('e.createdBy', 'user')
+      .addSelect([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+      ])
+      .andWhere('e.id = :id', {
+        id,
+      });
     const project = await query.getOne();
+
     if (project) {
       const sectionsPromises: Promise<Section>[] = project.sections.map(
         async (section: Section) => {
-          return await this.sectionService.getSection(section.id);
+          return await this.sectionService.getSection(section?.id);
         },
       );
       const sections: Section[] = await Promise.all(sectionsPromises);
       return { ...project, sections };
-    } else {
-      throw new NotFoundException();
     }
+
+    throw new NotFoundException();
   }
 
   public async createProject(
     input: CreateProjectRequest,
     user: User,
-  ): Promise<Project> {
+  ): Promise<CreateProjectResponse> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
       async (sectionId: number) => {
         return await this.sectionService.getSection(sectionId);
@@ -80,37 +102,57 @@ export class ProjectService {
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
 
-    return await this.projectRepository.save({
+    const result = await this.projectRepository.save({
       ...input,
       sections,
-      createdBy: user.id,
+      createdBy: user,
     });
+
+    return {
+      ...result,
+      createdBy: user.id,
+    };
   }
 
   public async updateProject(
     project: Project,
     input: CreateProjectRequest,
     user: User,
-  ): Promise<Project> {
+  ): Promise<CreateProjectResponse> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
       async (sectionId: number) => {
         return await this.sectionService.getSection(sectionId);
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
-    return await this.projectRepository.save({
-      ...project,
-      ...input,
-      sections,
-      createdBy: user.id,
-    });
+
+    if (project.createdBy.id === user.id) {
+      const result = await this.projectRepository.save({
+        ...project,
+        ...input,
+        sections,
+        createdBy: user,
+      });
+      return {
+        ...result,
+        createdBy: user.id,
+      };
+    }
+
+    throw new BadRequestException('You can not edit project!');
   }
 
-  public async deleteProject(id: number): Promise<DeleteResult> {
+  public async deleteProject(
+    id: number,
+    createdByUserId: string,
+  ): Promise<DeleteResult> {
     return await this.projectRepository
       .createQueryBuilder('e')
       .delete()
-      .where('id = :id', { id })
+      .where('id = :id AND createdBy = :createdByUserId', {
+        id,
+        createdByUserId,
+      })
       .execute();
   }
 
@@ -118,7 +160,7 @@ export class ProjectService {
     memberId: AssignUserProjectRequest,
     project: Project,
     user: User,
-  ): Promise<Project> {
+  ): Promise<CreateProjectResponse> {
     const member = await this.userService.getUser(memberId.userId);
 
     if (!member) {
@@ -132,16 +174,16 @@ export class ProjectService {
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
-    return await this.projectRepository.save({
+    const result = await this.projectRepository.save({
       ...project,
       sections,
       teamUsers: updatedTeamUsers,
-      createdBy: user.id,
+      createdBy: user,
     });
-  }
-
-  public async acceptOrReject() {
-    return;
+    return {
+      ...result,
+      createdBy: user.id,
+    };
   }
 
   public async inviteUser(payload: InviteUserProjectRequest): Promise<boolean> {
