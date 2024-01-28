@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserResponse } from './dtos/create.user.dto';
+import { GetUserResponse } from './dtos/create.user.dto';
 
 @Injectable()
 export class UserService {
@@ -15,7 +15,7 @@ export class UserService {
     return this.userRepository.createQueryBuilder('e').orderBy('e.id', 'DESC');
   }
 
-  public async getAllUsers(): Promise<CreateUserResponse[]> {
+  public async getAllUsers(): Promise<GetUserResponse[]> {
     const userList = await this.getUsersBaseQuery().getMany();
     return userList.map((user) => {
       return {
@@ -28,7 +28,7 @@ export class UserService {
     });
   }
 
-  public async getUser(id: string): Promise<CreateUserResponse | undefined> {
+  public async getUser(id: string): Promise<GetUserResponse | undefined> {
     const user = await this.getUsersBaseQuery()
       .andWhere('e.id = :id', { id })
       .getOne();
@@ -47,7 +47,7 @@ export class UserService {
 
   public async getUserByEmail(
     email: string,
-  ): Promise<CreateUserResponse | undefined> {
+  ): Promise<GetUserResponse | undefined> {
     const user = await this.getUsersBaseQuery()
       .andWhere('e.email = :email', {
         email,

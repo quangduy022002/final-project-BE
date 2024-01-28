@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Task } from 'src/task/entity/task.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Section {
@@ -8,5 +9,6 @@ export class Section {
   @Column({ unique: true })
   title: string;
 
-  // tasks:
+  @OneToMany(() => Task, (task) => task.status)
+  tasks?: Task[];
 }

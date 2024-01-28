@@ -16,7 +16,7 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
 import {
   CreateProjectRequest,
-  CreateProjectResponse,
+  GetProjectResponse,
 } from '../dtos/create.project.dto';
 import { AssignUserProjectRequest } from '../dtos/assign.user.project.dto';
 import {
@@ -49,7 +49,7 @@ export class ProjectController {
   async create(
     @Body() input: CreateProjectRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     return await this.projectService.createProject(input, user);
   }
 
@@ -63,7 +63,7 @@ export class ProjectController {
     @Param('id') id,
     @Body() input: CreateProjectRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
 
     if (!project) {
@@ -102,7 +102,7 @@ export class ProjectController {
     @Param('id') id,
     @Body() memberId: AssignUserProjectRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
 
     if (!project) {
@@ -126,7 +126,7 @@ export class ProjectController {
     @Param('id') id,
     @Body() memberId: AssignUserProjectRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
 
     if (!project) {

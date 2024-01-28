@@ -26,7 +26,7 @@ export class CreateUserRequest {
   email: string;
 }
 
-export class CreateUserResponse {
+export class GetUserResponse {
   @IsString()
   id: string;
 

@@ -12,6 +12,7 @@ import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
 import { PriorityModule } from './priority/priority.module';
 import { CommentModule } from './comment/comment.module';
+import { TypeModule } from './type/type.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommentModule } from './comment/comment.module';
     TaskModule,
     PriorityModule,
     CommentModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

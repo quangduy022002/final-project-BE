@@ -4,7 +4,7 @@ import { Comment } from './entity/comment.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import {
   CreateCommentRequest,
-  CreateCommentResponse,
+  GetCommentResponse,
 } from './dtos/create.comment.dto';
 import { User } from 'src/user/entity/user.entity';
 
@@ -55,7 +55,7 @@ export class CommentService {
   public async createComment(
     input: CreateCommentRequest,
     user: User,
-  ): Promise<CreateCommentResponse> {
+  ): Promise<GetCommentResponse> {
     const createdAt = new Date();
 
     const createdComment = await this.commentRepository.save({
@@ -76,7 +76,7 @@ export class CommentService {
     comment: Comment,
     input: CreateCommentRequest,
     user: User,
-  ): Promise<CreateCommentResponse> {
+  ): Promise<GetCommentResponse> {
     const updatedAt = new Date();
 
     if (comment.createdBy.id === user.id) {

@@ -14,7 +14,7 @@ import { CommentService } from '../comment.service';
 import { Comment } from '../entity/comment.entity';
 import {
   CreateCommentRequest,
-  CreateCommentResponse,
+  GetCommentResponse,
 } from '../dtos/create.comment.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
@@ -37,7 +37,7 @@ export class CommentController {
   async create(
     @Body() input: CreateCommentRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateCommentResponse> {
+  ): Promise<GetCommentResponse> {
     return await this.commentService.createComment(input, user);
   }
 
@@ -51,7 +51,7 @@ export class CommentController {
     @Param('id') id,
     @Body() input: CreateCommentRequest,
     @CurrentUser() user: User,
-  ): Promise<CreateCommentResponse> {
+  ): Promise<GetCommentResponse> {
     const comment = await this.commentService.getComment(id);
 
     if (!comment) {

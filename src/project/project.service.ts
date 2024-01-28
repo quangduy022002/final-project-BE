@@ -12,7 +12,7 @@ import { SectionService } from 'src/section/section.service';
 import { Section } from 'src/section/entity/section.entity';
 import {
   CreateProjectRequest,
-  CreateProjectResponse,
+  GetProjectResponse,
 } from './dtos/create.project.dto';
 import { AssignUserProjectRequest } from './dtos/assign.user.project.dto';
 import {
@@ -20,7 +20,7 @@ import {
   InviteUserProjectResponse,
 } from './dtos/invite.user.project.dto';
 import nodemailer from 'nodemailer';
-import { CreateUserResponse } from 'src/user/dtos/create.user.dto';
+import { GetUserResponse } from 'src/user/dtos/create.user.dto';
 
 @Injectable()
 export class ProjectService {
@@ -37,24 +37,24 @@ export class ProjectService {
       .orderBy('e.id', 'DESC');
   }
 
-  private async mapTeamUsers(data): Promise<CreateUserResponse[]> {
-    const teamUserPromise: Promise<CreateUserResponse>[] = data.map(
-      async (user: User) => {
-        return await this.userService.getUser(user.id);
+  private async mapTeamUsers(data): Promise<GetUserResponse[]> {
+    const teamUserPromise: Promise<GetUserResponse>[] = data.map(
+      async (user: string) => {
+        return await this.userService.getUser(user);
       },
     );
 
-    const teamUsers: CreateUserResponse[] = await Promise.all(teamUserPromise);
+    const teamUsers: GetUserResponse[] = await Promise.all(teamUserPromise);
 
     return teamUsers;
   }
 
   private async updateTeamUser(
     project: Project,
-    member: CreateUserResponse,
+    member: GetUserResponse,
     flag: string = '',
-  ): Promise<Array<CreateUserResponse>> {
-    const updatedTeamUsers: Array<CreateUserResponse> = [...project.teamUsers];
+  ): Promise<GetUserResponse[]> {
+    const updatedTeamUsers: GetUserResponse[] = [...project.teamUsers];
     if (!flag) {
       if (
         !updatedTeamUsers.some(
@@ -64,7 +64,9 @@ export class ProjectService {
         updatedTeamUsers.push(member);
       }
 
-      const teamUsers = await this.mapTeamUsers(updatedTeamUsers);
+      const teamUsers = await this.mapTeamUsers(
+        updatedTeamUsers.map((user) => user.id),
+      );
       return teamUsers;
     } else {
       if (
@@ -123,7 +125,7 @@ export class ProjectService {
   public async createProject(
     input: CreateProjectRequest,
     user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
       async (sectionId: number) => {
         return await this.sectionService.getSection(sectionId);
@@ -145,7 +147,7 @@ export class ProjectService {
     project: Project,
     input: CreateProjectRequest,
     user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const sectionsPromises: Promise<Section>[] = input.sections.map(
       async (sectionId: number) => {
         return await this.sectionService.getSection(sectionId);
@@ -190,7 +192,7 @@ export class ProjectService {
     memberId: AssignUserProjectRequest,
     project: Project,
     user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const member = await this.userService.getUser(memberId.userId);
 
     if (!member) {
@@ -200,7 +202,10 @@ export class ProjectService {
     const updatedTeamUsers = await this.updateTeamUser(project, member);
     const sectionsPromises: Promise<Section>[] = project.sections.map(
       async (section: Section) => {
-        return await this.sectionService.getSection(section.id);
+        if (section) {
+          return await this.sectionService.getSection(section.id);
+        }
+        return null;
       },
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
@@ -222,7 +227,7 @@ export class ProjectService {
     memberId: AssignUserProjectRequest,
     project: Project,
     user: User,
-  ): Promise<CreateProjectResponse> {
+  ): Promise<GetProjectResponse> {
     const member = await this.userService.getUser(memberId.userId);
 
     if (!member) {
