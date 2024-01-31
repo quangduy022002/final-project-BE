@@ -15,7 +15,7 @@ import { CodeAuthRequest } from '../dtos/code.auth.dto';
 import { LoginUserRequest } from 'src/user/dtos/login.user.dto';
 import {
   CreateUserRequest,
-  CreateUserResponse,
+  GetUserResponse,
 } from 'src/user/dtos/create.user.dto';
 import { EmailUserRequest } from 'src/user/dtos/email.user.dto';
 import { PasswordUserRequest } from 'src/user/dtos/password.user.dto';
@@ -35,7 +35,7 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() loginUserRequest: LoginUserRequest,
   ) {
-    const userInfo: CreateUserResponse = {
+    const userInfo: GetUserResponse = {
       id: user.id,
       username: user.username,
       email: user.email,
@@ -51,13 +51,11 @@ export class AuthController {
   @Post('createUser')
   async createUser(
     @Body() createUserRequest: CreateUserRequest,
-  ): Promise<CreateUserResponse> {
+  ): Promise<GetUserResponse> {
     const user = new User();
 
     if (createUserRequest.password !== createUserRequest.retypedPassword) {
-      throw new BadRequestException([
-        'Re-password is not the same as password!',
-      ]);
+      throw new BadRequestException('Re-password is not the same as password!');
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -68,7 +66,7 @@ export class AuthController {
     });
 
     if (existingUser) {
-      throw new BadRequestException(['Username or Email is existed!']);
+      throw new BadRequestException('Username or Email is existed!');
     }
 
     user.username = createUserRequest.username;
@@ -105,7 +103,7 @@ export class AuthController {
   @Post('resetPassword')
   async resetPassword(@Body() { password, rePassword }: PasswordUserRequest) {
     if (password !== rePassword)
-      throw new BadRequestException(['Re-password is not same !']);
+      throw new BadRequestException('Re-password is not same !');
 
     const hashPass = await this.authService.hashPassword(password);
 

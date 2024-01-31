@@ -17,7 +17,7 @@ export class SectionService {
       .orderBy('e.id', 'DESC');
   }
 
-  public async getAllSections() {
+  public async getAllSections(): Promise<Section[]> {
     return await this.getSectionsBaseQuery().getMany();
   }
 

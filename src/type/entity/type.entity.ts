@@ -1,10 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Section {
+export class Type {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ unique: true })
-  title: string;
+  name: string;
 }
