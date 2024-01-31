@@ -55,9 +55,7 @@ export class AuthController {
     const user = new User();
 
     if (createUserRequest.password !== createUserRequest.retypedPassword) {
-      throw new BadRequestException([
-        'Re-password is not the same as password!',
-      ]);
+      throw new BadRequestException('Re-password is not the same as password!');
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -68,7 +66,7 @@ export class AuthController {
     });
 
     if (existingUser) {
-      throw new BadRequestException(['Username or Email is existed!']);
+      throw new BadRequestException('Username or Email is existed!');
     }
 
     user.username = createUserRequest.username;
@@ -105,7 +103,7 @@ export class AuthController {
   @Post('resetPassword')
   async resetPassword(@Body() { password, rePassword }: PasswordUserRequest) {
     if (password !== rePassword)
-      throw new BadRequestException(['Re-password is not same !']);
+      throw new BadRequestException('Re-password is not same !');
 
     const hashPass = await this.authService.hashPassword(password);
 

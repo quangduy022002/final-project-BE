@@ -6,5 +6,5 @@ export class Priority {
   id: number;
 
   @Column({ unique: true })
-  title: string;
+  name: string;
 }

@@ -24,7 +24,7 @@ export class CreateProjectRequest {
 export class GetProjectResponse {
   id: string;
 
-  title: string;
+  name: string;
 
   description: string;
 

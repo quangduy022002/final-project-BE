@@ -7,12 +7,14 @@ import {
   GetCommentResponse,
 } from './dtos/create.comment.dto';
 import { User } from 'src/user/entity/user.entity';
+import { TaskService } from 'src/task/task.service';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    private readonly taskService: TaskService,
   ) {}
 
   private getCommentsBaseQuery() {
@@ -58,11 +60,14 @@ export class CommentService {
   ): Promise<GetCommentResponse> {
     const createdAt = new Date();
 
+    const task = await this.taskService.getTaskDetail(input.taskId);
+
     const createdComment = await this.commentRepository.save({
       ...input,
       createdAt,
       updatedAt: new Date(),
       createdBy: user,
+      taskId: task.id,
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...info } = user;
@@ -78,12 +83,13 @@ export class CommentService {
     user: User,
   ): Promise<GetCommentResponse> {
     const updatedAt = new Date();
-
+    const task = await this.taskService.getTaskDetail(input.taskId);
     if (comment.createdBy.id === user.id) {
       const updatedComment = await this.commentRepository.save({
         ...comment,
         ...input,
         updatedAt,
+        taskId: task.id,
         createdBy: user,
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

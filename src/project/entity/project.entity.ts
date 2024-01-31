@@ -4,7 +4,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -14,7 +14,7 @@ export class Project {
   id: string;
 
   @Column()
-  title: string;
+  name: string;
 
   @Column()
   description: string;
@@ -28,7 +28,7 @@ export class Project {
   @Column({ type: 'json', nullable: true })
   teamUsers: User[] | null;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'createdBy' })
   createdBy?: User;
 }

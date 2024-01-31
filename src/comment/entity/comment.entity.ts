@@ -4,8 +4,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToMany,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -17,7 +16,7 @@ export class Comment {
   @Column()
   content: string;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'createdBy' })
   createdBy: User;
 
@@ -27,7 +26,7 @@ export class Comment {
   @Column()
   updatedAt?: Date;
 
-  @OneToMany(() => Task, (task) => task.id)
-  @JoinColumn({ name: 'belongTo' })
-  belongTo: Task;
+  @ManyToOne(() => Task, (task) => task.id)
+  @Column()
+  taskId: string;
 }

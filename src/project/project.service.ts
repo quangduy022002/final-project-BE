@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { Project } from './entity/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -119,7 +115,7 @@ export class ProjectService {
       return { ...project, sections };
     }
 
-    throw new NotFoundException();
+    throw new BadRequestException('Project not found!');
   }
 
   public async createProject(
@@ -194,10 +190,6 @@ export class ProjectService {
     user: User,
   ): Promise<GetProjectResponse> {
     const member = await this.userService.getUser(memberId.userId);
-
-    if (!member) {
-      throw new BadRequestException('User not found');
-    }
 
     const updatedTeamUsers = await this.updateTeamUser(project, member);
     const sectionsPromises: Promise<Section>[] = project.sections.map(
@@ -287,7 +279,7 @@ export class ProjectService {
       subject: 'Invite user to project',
       text: 'New message',
       html: `<div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                <p style="font-size: '20px'; font-weight: 600;">Invite you to join ${project.title} project</p>
+                <p style="font-size: '20px'; font-weight: 600;">Invite you to join ${project.name} project</p>
                 <a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 5px;" 
                     href="https://www.google.com/" 
                     target="_blank"

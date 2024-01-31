@@ -1,15 +1,15 @@
 import { Comment } from 'src/comment/entity/comment.entity';
 import { Priority } from 'src/priority/entity/priority.entity';
+import { Project } from 'src/project/entity/project.entity';
 import { Section } from 'src/section/entity/section.entity';
-import { Time } from 'src/time/entity/time.entity';
 import { Type } from 'src/type/entity/type.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -34,16 +34,20 @@ export class Task {
   type: Type;
 
   @Column({ type: 'json', nullable: true })
-  time: Time;
+  time: object;
 
   @Column({ type: 'json', nullable: true })
   teamUsers: User[];
 
   @Column({ type: 'json', nullable: true })
-  @OneToMany(() => Comment, (cmt) => cmt.belongTo)
+  @OneToMany(() => Comment, (cmt) => cmt.id)
   comments: Comment[] | null;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'createdBy' })
   createdBy?: User;
+
+  @ManyToOne(() => Project, (project) => project.id)
+  @Column()
+  projectId: string;
 }

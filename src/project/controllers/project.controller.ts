@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -66,10 +65,6 @@ export class ProjectController {
   ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
 
-    if (!project) {
-      throw new NotFoundException();
-    }
-
     return await this.projectService.updateProject(project, input, user);
   }
 
@@ -83,12 +78,6 @@ export class ProjectController {
     @Param('id') id,
     @CurrentUser() user: User,
   ): Promise<DeleteResult> {
-    const project = await this.projectService.getProjectDetail(id);
-
-    if (!project) {
-      throw new NotFoundException();
-    }
-
     return await this.projectService.deleteProject(id, user.id);
   }
 
@@ -104,10 +93,6 @@ export class ProjectController {
     @CurrentUser() user: User,
   ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
-
-    if (!project) {
-      throw new NotFoundException();
-    }
 
     return await this.projectService.assignMemberToProject(
       memberId,
@@ -128,10 +113,6 @@ export class ProjectController {
     @CurrentUser() user: User,
   ): Promise<GetProjectResponse> {
     const project = await this.projectService.getProjectDetail(id);
-
-    if (!project) {
-      throw new NotFoundException();
-    }
 
     return await this.projectService.removeMemberToProject(
       memberId,

@@ -4,6 +4,9 @@ import { GetUserResponse } from 'src/user/dtos/create.user.dto';
 export class CreateCommentRequest {
   @IsNotEmpty()
   content: string;
+
+  @IsNotEmpty()
+  taskId: string;
 }
 
 export class GetCommentResponse {
@@ -16,4 +19,6 @@ export class GetCommentResponse {
   createdAt?: Date;
 
   updatedAt?: Date;
+
+  taskId: string;
 }
