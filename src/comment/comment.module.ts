@@ -4,7 +4,6 @@ import { Comment } from './entity/comment.entity';
 import { CommentController } from './controller/comment.controller';
 import { CommentService } from './comment.service';
 import { Task } from 'src/task/entity/task.entity';
-import { TaskService } from 'src/task/task.service';
 import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Section } from 'src/section/entity/section.entity';
@@ -31,7 +30,6 @@ import { ProjectService } from 'src/project/project.service';
   controllers: [CommentController],
   providers: [
     CommentService,
-    TaskService,
     UserService,
     SectionService,
     TypeService,

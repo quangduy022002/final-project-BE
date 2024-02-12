@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -16,17 +17,23 @@ export class Comment {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'createdBy' })
-  createdBy: User;
-
   @Column()
   createdAt?: Date;
 
   @Column()
   updatedAt?: Date;
 
-  @ManyToOne(() => Task, (task) => task.id)
-  @Column()
-  taskId: string;
+  @ManyToOne(() => Task, (task) => task.comments)
+  @JoinColumn({ name: 'task' })
+  task?: Task;
+
+  @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'createdBy' })
+  createdBy?: User;
+
+  @ManyToOne(() => Comment, (parent) => parent.children, { nullable: true })
+  parent?: Comment | null;
+
+  @OneToMany(() => Comment, (child) => child.parent)
+  children?: Comment[];
 }

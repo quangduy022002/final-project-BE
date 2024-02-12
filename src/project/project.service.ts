@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { Project } from './entity/project.entity';
@@ -17,12 +18,15 @@ import {
 } from './dtos/invite.user.project.dto';
 import nodemailer from 'nodemailer';
 import { GetUserResponse } from 'src/user/dtos/create.user.dto';
+import { Task } from 'src/task/entity/task.entity';
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @InjectRepository(Task)
+    private readonly taskRepository: Repository<Task>,
     private readonly sectionService: SectionService,
     private readonly userService: UserService,
   ) {}
@@ -33,7 +37,7 @@ export class ProjectService {
       .orderBy('e.id', 'DESC');
   }
 
-  private async mapTeamUsers(data): Promise<GetUserResponse[]> {
+  private async mapTeamUsers(data: Array<string>): Promise<GetUserResponse[]> {
     const teamUserPromise: Promise<GetUserResponse>[] = data.map(
       async (user: string) => {
         return await this.userService.getUser(user);
@@ -77,8 +81,26 @@ export class ProjectService {
     }
   }
 
+  private async getTaskListBaseQuery(projectId: string): Promise<Task[]> {
+    return this.taskRepository
+      .createQueryBuilder('e')
+      .orderBy('e.id', 'DESC')
+      .leftJoin('e.createdBy', 'user')
+      .leftJoin('e.project', 'project')
+      .addSelect([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'project.id',
+      ])
+      .andWhere('project.id = :id', { id: projectId })
+      .getMany();
+  }
+
   public async getAllProjects(): Promise<Project[]> {
-    return await this.getProjectsBaseQuery()
+    const projects = await this.getProjectsBaseQuery()
       .leftJoin('e.createdBy', 'user')
       .addSelect([
         'user.id',
@@ -88,6 +110,17 @@ export class ProjectService {
         'user.lastName',
       ])
       .getMany();
+
+    const result: Project[] = await Promise.all(
+      projects.map(async (project: Project) => {
+        const tasks = await this.getTaskListBaseQuery(project.id);
+        return {
+          ...project,
+          tasks,
+        };
+      }),
+    );
+    return result;
   }
 
   public async getProjectDetail(id: string): Promise<Project> {
@@ -105,17 +138,20 @@ export class ProjectService {
       });
     const project = await query.getOne();
 
-    if (project) {
-      const sectionsPromises: Promise<Section>[] = project.sections.map(
-        async (section: Section) => {
-          return await this.sectionService.getSection(section?.id);
-        },
-      );
-      const sections: Section[] = await Promise.all(sectionsPromises);
-      return { ...project, sections };
+    if (!project) {
+      throw new BadRequestException('Project not found!');
     }
 
-    throw new BadRequestException('Project not found!');
+    const sectionsPromises: Promise<Section>[] = project.sections.map(
+      async (section: Section) => {
+        return await this.sectionService.getSection(section?.id);
+      },
+    );
+    const sections: Section[] = await Promise.all(sectionsPromises);
+
+    const tasks = await this.getTaskListBaseQuery(project.id);
+
+    return { ...project, sections, tasks };
   }
 
   public async createProject(
@@ -129,12 +165,14 @@ export class ProjectService {
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
     const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...info } = user;
     return await this.projectRepository.save({
-      ...input,
+      name: input.name,
+      description: input.description,
+      category: input.category,
       teamUsers,
       sections,
+      tasks: [],
       createdBy: info,
     });
   }
@@ -151,19 +189,22 @@ export class ProjectService {
     );
     const sections: Section[] = await Promise.all(sectionsPromises);
     const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...info } = user;
     if (project.createdBy.id === user.id) {
+      console.log(project, 'project');
       const result = await this.projectRepository.save({
-        ...project,
-        ...input,
-        teamUsers,
+        id: project.id,
+        name: input.name,
+        description: input.description,
+        category: input.category,
         sections,
+        teamUsers,
         createdBy: user,
       });
       return {
         ...result,
         createdBy: info,
+        tasks: project.tasks,
       };
     }
 
@@ -192,27 +233,24 @@ export class ProjectService {
     const member = await this.userService.getUser(memberId.userId);
 
     const updatedTeamUsers = await this.updateTeamUser(project, member);
-    const sectionsPromises: Promise<Section>[] = project.sections.map(
-      async (section: Section) => {
-        if (section) {
-          return await this.sectionService.getSection(section.id);
-        }
-        return null;
-      },
-    );
-    const sections: Section[] = await Promise.all(sectionsPromises);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    const result = await this.projectRepository.save({
-      ...project,
-      sections,
-      teamUsers: updatedTeamUsers,
-      createdBy: user,
-    });
-    return {
-      ...result,
-      createdBy: info,
-    };
+    if (project.createdBy.id === user.id) {
+      const { password, ...info } = user;
+      const result = await this.projectRepository.save({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        category: project.category,
+        sections: project.sections,
+        teamUsers: updatedTeamUsers,
+        createdBy: user,
+      });
+      return {
+        ...result,
+        createdBy: info,
+        tasks: project.tasks,
+      };
+    }
+    throw new BadRequestException('You can not add member to project!');
   }
 
   public async removeMemberToProject(
@@ -230,24 +268,24 @@ export class ProjectService {
       member,
       'remove',
     );
-    const sectionsPromises: Promise<Section>[] = project.sections.map(
-      async (section: Section) => {
-        return await this.sectionService.getSection(section.id);
-      },
-    );
-    const sections: Section[] = await Promise.all(sectionsPromises);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    const result = await this.projectRepository.save({
-      ...project,
-      sections,
-      teamUsers: updatedTeamUsers,
-      createdBy: user,
-    });
-    return {
-      ...result,
-      createdBy: info,
-    };
+    if (project.createdBy.id === user.id) {
+      const { password, ...info } = user;
+      const result = await this.projectRepository.save({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        category: project.category,
+        sections: project.sections,
+        teamUsers: updatedTeamUsers,
+        createdBy: user,
+      });
+      return {
+        ...result,
+        createdBy: info,
+        tasks: project.tasks,
+      };
+    }
+    throw new BadRequestException('You can not add member to project!');
   }
 
   public async inviteUser(payload: InviteUserProjectRequest): Promise<boolean> {
@@ -305,10 +343,15 @@ export class ProjectService {
 
     const updatedTeamUsers = await this.updateTeamUser(project, member);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updatedProject = await this.projectRepository.save({
-      ...project,
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      category: project.category,
+      sections: project.sections,
+      tasks: project.tasks,
       teamUsers: updatedTeamUsers,
+      createdBy: project.createdBy,
     });
 
     return {

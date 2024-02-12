@@ -8,11 +8,11 @@ import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { ConfigModule } from '@nestjs/config';
 import { TaskModule } from './task/task.module';
-import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
 import { PriorityModule } from './priority/priority.module';
 import { CommentModule } from './comment/comment.module';
 import { TypeModule } from './type/type.module';
+import ormConfig from './config/orm.config';
 
 @Module({
   imports: [
@@ -33,7 +33,6 @@ import { TypeModule } from './type/type.module';
     TaskModule,
     PriorityModule,
     TypeModule,
-    // CommunityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

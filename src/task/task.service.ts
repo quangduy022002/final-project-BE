@@ -13,6 +13,8 @@ import { GetTimeResponse } from 'src/time/dtos/create.time.dto';
 import { ProjectService } from 'src/project/project.service';
 import { AssignUserProjectRequest } from 'src/project/dtos/assign.user.project.dto';
 import { Comment } from 'src/comment/entity/comment.entity';
+import { UpdateTaskRequest } from './dtos/update.task.dto';
+import { GetCommentResponse } from 'src/comment/dtos/create.comment.dto';
 
 @Injectable()
 export class TaskService {
@@ -32,11 +34,32 @@ export class TaskService {
     return this.taskRepository.createQueryBuilder('e').orderBy('e.id', 'DESC');
   }
 
+  private mappedComment(comment: Comment): GetCommentResponse {
+    const commentResponse: GetCommentResponse = {
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      createdBy: comment.createdBy,
+      updatedAt: comment.updatedAt,
+      ...(comment.task && { taskId: comment.task.id }),
+      ...(comment.parent && { parentId: comment.parent.id }),
+    };
+    if (comment.children && comment.children.length > 0) {
+      commentResponse.children = comment.children.map((child) =>
+        this.mappedComment(child),
+      );
+    }
+
+    return commentResponse;
+  }
+
   private async getAllCommentByTask(id: string): Promise<Comment[]> {
     return await this.commentRepository
       .createQueryBuilder('e')
       .orderBy('e.id', 'DESC')
       .leftJoin('e.createdBy', 'user')
+      .leftJoinAndSelect('e.children', 'children')
+      .leftJoinAndSelect('e.parent', 'parent')
       .addSelect([
         'user.id',
         'user.username',
@@ -44,11 +67,12 @@ export class TaskService {
         'user.firstName',
         'user.lastName',
       ])
-      .andWhere('e.taskId = :id', { id })
+      .leftJoin('e.task', 'task')
+      .andWhere('task.id = :id', { id })
       .getMany();
   }
 
-  private async mapTeamUsers(data): Promise<GetUserResponse[]> {
+  private async mapTeamUsers(data: string[]): Promise<GetUserResponse[]> {
     const teamUserPromise: Promise<GetUserResponse>[] = data.map(
       async (user: string) => {
         return await this.userService.getUser(user);
@@ -92,28 +116,47 @@ export class TaskService {
     }
   }
 
-  public async getAllTasks(): Promise<GetTaskResponse[]> {
-    return await this.getTasksBaseQuery()
+  public async getAllTasks(): Promise<Task[]> {
+    const tasks = await this.getTasksBaseQuery()
       .leftJoin('e.createdBy', 'user')
+      .leftJoin('e.project', 'project')
       .addSelect([
         'user.id',
         'user.username',
         'user.email',
         'user.firstName',
         'user.lastName',
+        'project.id',
       ])
       .getMany();
+
+    const result: Task[] = await Promise.all(
+      tasks.map(async (task: Task) => {
+        const commentList = await this.getAllCommentByTask(task.id);
+        const commentsMapped = commentList.map((comment) =>
+          this.mappedComment(comment),
+        );
+        const comments = commentsMapped.filter((comment) => !comment.parentId);
+        return {
+          ...task,
+          comments,
+        };
+      }),
+    );
+    return result;
   }
 
   public async getTaskDetail(id: string): Promise<GetTaskResponse> {
     const query = await this.getTasksBaseQuery()
       .leftJoin('e.createdBy', 'user')
+      .leftJoin('e.project', 'project')
       .addSelect([
         'user.id',
         'user.username',
         'user.email',
         'user.firstName',
         'user.lastName',
+        'project.id',
       ])
       .andWhere('e.id = :id', {
         id,
@@ -122,11 +165,23 @@ export class TaskService {
 
     if (!task) throw new BadRequestException('Task not found!');
 
-    const comments = await this.getAllCommentByTask(task.id);
-
+    const commentList = await this.getAllCommentByTask(task.id);
+    const commentsMapped = commentList.map((comment) =>
+      this.mappedComment(comment),
+    );
+    const comments = commentsMapped.filter((comment) => !comment.parentId);
+    // delete task.project;
     return {
-      ...task,
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      type: task.type,
+      time: task.time,
+      teamUsers: task.teamUsers,
       comments,
+      projectId: task.project.id,
     };
   }
 
@@ -136,116 +191,159 @@ export class TaskService {
   ): Promise<GetTaskResponse> {
     const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    const status = await this.sectionService.getSection(input.statusId);
-    const priority = await this.priorityService.getPriority(input.priorityId);
-    const type = await this.typeService.getType(input.typeId);
-    const project = await this.projectService.getProjectDetail(input.projectId);
+    const { password, ...userInfo } = user;
+    const [status, priority, type, project] = await Promise.all([
+      this.sectionService.getSection(input.statusId),
+      this.priorityService.getPriority(input.priorityId),
+      this.typeService.getType(input.typeId),
+      this.projectService.getProjectDetail(input.projectId),
+    ]);
 
-    const result = await this.taskRepository.save({
-      ...input,
-      teamUsers,
-      status,
-      priority,
-      type,
-      createdBy: info,
-    });
     const time: GetTimeResponse = {
-      originalTime: result.originalTime,
-      estimateTime: result.estimateTime,
+      originalTime: input.originalTime,
+      estimateTime: input.estimateTime,
     };
 
-    return {
-      id: result.id,
-      name: result.name,
-      description: result.description,
+    const task = await this.taskRepository.save({
+      name: input.name,
+      description: input.description,
       status,
       priority,
       type,
       time,
       teamUsers,
       comments: [],
+      project,
+      createdBy: userInfo,
+    });
+
+    return {
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      type: task.type,
+      time: task.time,
+      teamUsers: task.teamUsers,
       projectId: project.id,
-      createdBy: result.createdBy,
     };
   }
 
   public async updateTask(
     task: GetTaskResponse,
-    input: CreateTaskRequest,
+    input: UpdateTaskRequest,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     user: User,
   ): Promise<GetTaskResponse> {
     const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    const status = await this.sectionService.getSection(input.statusId);
-    const priority = await this.priorityService.getPriority(input.priorityId);
-    const type = await this.typeService.getType(input.typeId);
-    const project = await this.projectService.getProjectDetail(input.projectId);
-    const comments = await this.getAllCommentByTask(task.id);
-    const result = await this.taskRepository.save({
-      ...task,
-      ...input,
-      teamUsers,
-      status,
-      priority,
-      type,
-      createdBy: info,
-    });
+    const [status, priority, type, project] = await Promise.all([
+      this.sectionService.getSection(input.statusId),
+      this.priorityService.getPriority(input.priorityId),
+      this.typeService.getType(input.typeId),
+      this.projectService.getProjectDetail(task.projectId),
+    ]);
+
     const time: GetTimeResponse = {
-      originalTime: result.originalTime,
-      estimateTime: result.estimateTime,
+      originalTime: input.originalTime,
+      estimateTime: input.estimateTime,
     };
 
-    return {
-      id: result.id,
-      name: result.name,
-      description: result.description,
+    const updatedTask = await this.taskRepository.save({
+      id: task.id,
+      name: input.name,
+      description: input.description,
       status,
       priority,
       type,
       time,
       teamUsers,
+      project,
+    });
+
+    return {
+      id: updatedTask.id,
+      name: updatedTask.name,
+      description: updatedTask.description,
+      status: updatedTask.status,
+      priority: updatedTask.priority,
+      type: updatedTask.type,
+      time: updatedTask.time,
+      teamUsers: updatedTask.teamUsers,
       projectId: project.id,
-      comments,
-      createdBy: result.createdBy,
     };
   }
 
   public async assignMemberToTask(
     memberId: AssignUserProjectRequest,
     task: GetTaskResponse,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     user: User,
   ): Promise<GetTaskResponse> {
     const member = await this.userService.getUser(memberId.userId);
-    const comments = await this.getAllCommentByTask(task.id);
-    const updatedTeamUsers = await this.updateTeamUser(task, member);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    return await this.taskRepository.save({
-      ...task,
-      teamUsers: updatedTeamUsers,
-      comments,
-      createdBy: info,
-    });
+    const [updatedTeamUsers, project] = await Promise.all([
+      this.updateTeamUser(task, member),
+      this.projectService.getProjectDetail(task.projectId),
+    ]);
+    const { id, name, description, status, priority, type, time, teamUsers } =
+      await this.taskRepository.save({
+        id: task.id,
+        name: task.name,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        type: task.type,
+        time: task.time,
+        project,
+        teamUsers: updatedTeamUsers,
+      });
+    return {
+      id,
+      name,
+      description,
+      status,
+      priority,
+      type,
+      time,
+      teamUsers,
+      projectId: task.id,
+    };
   }
 
   public async removeMemberToTask(
     memberId: AssignUserProjectRequest,
     task: GetTaskResponse,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     user: User,
   ): Promise<GetTaskResponse> {
     const member = await this.userService.getUser(memberId.userId);
-    const comments = await this.getAllCommentByTask(task.id);
-    const updatedTeamUsers = await this.updateTeamUser(task, member, 'remove');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...info } = user;
-    return await this.taskRepository.save({
-      ...task,
-      teamUsers: updatedTeamUsers,
-      comments,
-      createdBy: info,
-    });
+    const [updatedTeamUsers, project] = await Promise.all([
+      this.updateTeamUser(task, member, 'remove'),
+      this.projectService.getProjectDetail(task.projectId),
+    ]);
+    const { id, name, description, status, priority, type, time, teamUsers } =
+      await this.taskRepository.save({
+        id: task.id,
+        name: task.name,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        type: task.type,
+        time: task.time,
+        project,
+        teamUsers: updatedTeamUsers,
+      });
+    return {
+      id,
+      name,
+      description,
+      status,
+      priority,
+      type,
+      time,
+      teamUsers,
+      projectId: task.projectId,
+    };
   }
 
   public async deleteTask(id: string): Promise<DeleteResult> {

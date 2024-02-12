@@ -31,7 +31,6 @@ export class CreateTaskRequest {
   @IsNotEmpty()
   projectId: string;
 }
-
 export class GetTaskResponse {
   id: string;
 
@@ -47,11 +46,11 @@ export class GetTaskResponse {
 
   time: object;
 
-  createdBy?: GetUserResponse;
+  projectId: string;
 
   teamUsers?: GetUserResponse[];
 
   comments?: Comment[];
 
-  projectId: string;
+  createdBy?: GetUserResponse;
 }

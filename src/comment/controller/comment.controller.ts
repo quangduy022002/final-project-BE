@@ -11,10 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentService } from '../comment.service';
-import { Comment } from '../entity/comment.entity';
 import {
   CreateCommentRequest,
   GetCommentResponse,
+  UpdateCommentRequest,
 } from '../dtos/create.comment.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
@@ -27,7 +27,7 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Get('getAll')
-  async findAll(): Promise<Comment[]> {
+  async findAll(): Promise<GetCommentResponse[]> {
     return await this.commentService.getAllComments();
   }
 
@@ -49,7 +49,7 @@ export class CommentController {
   @UseGuards(AuthGuardJwt)
   async update(
     @Param('id') id,
-    @Body() input: CreateCommentRequest,
+    @Body() input: UpdateCommentRequest,
     @CurrentUser() user: User,
   ): Promise<GetCommentResponse> {
     const comment = await this.commentService.getComment(id);
