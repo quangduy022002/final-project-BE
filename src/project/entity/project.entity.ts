@@ -1,9 +1,11 @@
 import { Section } from 'src/section/entity/section.entity';
+import { Task } from 'src/task/entity/task.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -28,7 +30,11 @@ export class Project {
   @Column({ type: 'json', nullable: true })
   teamUsers: User[] | null;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToMany(() => Task, (task) => task.project, { cascade: true })
+  @Column({ type: 'json', nullable: true })
+  tasks?: Task[] | null;
+
+  @ManyToOne(() => User, (user) => user.ownerProject, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'createdBy' })
   createdBy?: User;
 }

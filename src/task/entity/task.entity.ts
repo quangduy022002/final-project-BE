@@ -8,8 +8,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -39,15 +39,14 @@ export class Task {
   @Column({ type: 'json', nullable: true })
   teamUsers: User[];
 
-  @Column({ type: 'json', nullable: true })
-  @OneToMany(() => Comment, (cmt) => cmt.id)
+  @ManyToMany(() => Comment, (cmt) => cmt.task)
   comments: Comment[] | null;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'project' })
+  project: Project;
+
+  @ManyToOne(() => User, (user) => user.ownerTask, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'createdBy' })
   createdBy?: User;
-
-  @ManyToOne(() => Project, (project) => project.id)
-  @Column()
-  projectId: string;
 }

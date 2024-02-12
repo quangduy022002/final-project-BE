@@ -11,7 +11,7 @@ export class User {
   username: string;
 
   @Column()
-  password: string;
+  password?: string;
 
   @Column()
   firstName: string;
@@ -22,12 +22,12 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @OneToMany(() => Project, (project) => project.createdBy)
-  ownerProject: Project[];
+  @OneToMany(() => Project, (project) => project.createdBy, { cascade: true })
+  ownerProject?: Project[];
 
-  @OneToMany(() => Comment, (comment) => comment.createdBy)
-  comments: Comment[];
+  @OneToMany(() => Comment, (comment) => comment.createdBy, { cascade: true })
+  comments?: Comment[];
 
-  @OneToMany(() => Task, (task) => task.createdBy)
-  ownerTask: Task[];
+  @OneToMany(() => Task, (task) => task.createdBy, { cascade: true })
+  ownerTask?: Task[];
 }

@@ -7,9 +7,10 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entity/user.entity';
 import { Section } from 'src/section/entity/section.entity';
 import { SectionService } from 'src/section/section.service';
+import { Task } from 'src/task/entity/task.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Project, User, Section])],
+  imports: [TypeOrmModule.forFeature([Project, User, Section, Task])],
   providers: [ProjectService, UserService, SectionService],
   controllers: [ProjectController],
 })

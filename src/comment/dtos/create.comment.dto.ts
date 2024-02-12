@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { GetUserResponse } from 'src/user/dtos/create.user.dto';
 
 export class CreateCommentRequest {
@@ -7,6 +7,14 @@ export class CreateCommentRequest {
 
   @IsNotEmpty()
   taskId: string;
+
+  @IsOptional()
+  parentId: string;
+}
+
+export class UpdateCommentRequest {
+  @IsNotEmpty()
+  content: string;
 }
 
 export class GetCommentResponse {
@@ -14,11 +22,15 @@ export class GetCommentResponse {
 
   content: string;
 
-  createdBy: GetUserResponse;
+  createdBy?: GetUserResponse;
 
   createdAt?: Date;
 
   updatedAt?: Date;
 
-  taskId: string;
+  taskId?: string;
+
+  children?: GetCommentResponse[];
+
+  parentId?: string;
 }

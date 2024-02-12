@@ -16,13 +16,15 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
 import { DeleteResult } from 'typeorm';
 import { AssignUserProjectRequest } from 'src/project/dtos/assign.user.project.dto';
+import { UpdateTaskRequest } from '../dtos/update.task.dto';
+import { Task } from '../entity/task.entity';
 
 @Controller('/tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Get('getAll')
-  async findAll(): Promise<GetTaskResponse[]> {
+  async findAll(): Promise<Task[]> {
     return await this.taskService.getAllTasks();
   }
 
@@ -52,11 +54,10 @@ export class TaskController {
   })
   async update(
     @Param('id') id,
-    @Body() input: CreateTaskRequest,
+    @Body() input: UpdateTaskRequest,
     @CurrentUser() user: User,
   ): Promise<GetTaskResponse> {
     const task = await this.taskService.getTaskDetail(id);
-
     return await this.taskService.updateTask(task, input, user);
   }
 
