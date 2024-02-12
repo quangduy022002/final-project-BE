@@ -191,7 +191,6 @@ export class ProjectService {
     const teamUsers = await this.mapTeamUsers([...input.teamUsers]);
     const { password, ...info } = user;
     if (project.createdBy.id === user.id) {
-      console.log(project, 'project');
       const result = await this.projectRepository.save({
         id: project.id,
         name: input.name,

@@ -135,7 +135,6 @@ export class CommentService {
       parent: parentComment ?? null,
       createdBy: user,
     });
-    console.log(createdComment, 'created comment');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...info } = user;
     const comment = {
