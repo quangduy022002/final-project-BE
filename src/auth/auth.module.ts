@@ -7,6 +7,8 @@ import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
+import { MediaService } from 'src/media/media.service';
+import { FirebaseService } from 'src/firebase/firebase.image.service';
 
 @Module({
   imports: [
@@ -20,7 +22,14 @@ import { UserService } from 'src/user/user.service';
       }),
     }),
   ],
-  providers: [LocalStrategy, JwtStrategy, AuthService, UserService],
+  providers: [
+    LocalStrategy,
+    JwtStrategy,
+    AuthService,
+    UserService,
+    MediaService,
+    FirebaseService,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

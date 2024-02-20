@@ -48,4 +48,13 @@ export class GetUserResponse {
 
   @IsString()
   token?: string;
+
+  avatar?: string;
+
+  //date of birth
+  dob?: Date;
+
+  phone?: string;
+
+  address?: string;
 }
