@@ -13,6 +13,7 @@ import { PriorityModule } from './priority/priority.module';
 import { CommentModule } from './comment/comment.module';
 import { TypeModule } from './type/type.module';
 import ormConfig from './config/orm.config';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import ormConfig from './config/orm.config';
     TaskModule,
     PriorityModule,
     TypeModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

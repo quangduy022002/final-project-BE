@@ -8,10 +8,11 @@ import { User } from 'src/user/entity/user.entity';
 import { Section } from 'src/section/entity/section.entity';
 import { SectionService } from 'src/section/section.service';
 import { Task } from 'src/task/entity/task.entity';
+import { MediaService } from 'src/media/media.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Project, User, Section, Task])],
-  providers: [ProjectService, UserService, SectionService],
+  providers: [ProjectService, UserService, SectionService, MediaService],
   controllers: [ProjectController],
 })
 export class ProjectModule {}

@@ -14,6 +14,7 @@ import { TypeService } from 'src/type/type.service';
 import { PriorityService } from 'src/priority/priority.service';
 import { Project } from 'src/project/entity/project.entity';
 import { ProjectService } from 'src/project/project.service';
+import { MediaService } from 'src/media/media.service';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ProjectService } from 'src/project/project.service';
     TypeService,
     PriorityService,
     ProjectService,
+    MediaService,
   ],
 })
 export class CommentModule {}

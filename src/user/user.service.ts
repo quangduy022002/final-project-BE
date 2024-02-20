@@ -3,16 +3,30 @@ import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetUserResponse } from './dtos/create.user.dto';
-
+import { MediaService } from 'src/media/media.service';
+import { UpdateUserRequest } from './dtos/update.user.dto';
+import { withTimestamp } from 'src/utils/withTimestamp';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly mediaService: MediaService,
   ) {}
 
   private getUsersBaseQuery() {
     return this.userRepository.createQueryBuilder('e').orderBy('e.id', 'DESC');
+  }
+
+  private async checkExistUser(id: string): Promise<User> {
+    const user = await this.getUsersBaseQuery()
+      .andWhere('e.id = :id', { id })
+      .getOne();
+
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+    return user;
   }
 
   public async getAllUsers(): Promise<GetUserResponse[]> {
@@ -29,13 +43,7 @@ export class UserService {
   }
 
   public async getUser(id: string): Promise<GetUserResponse | undefined> {
-    const user = await this.getUsersBaseQuery()
-      .andWhere('e.id = :id', { id })
-      .getOne();
-
-    if (!user) {
-      throw new BadRequestException('User not found!');
-    }
+    const user = await this.checkExistUser(id);
     return {
       id: user.id,
       username: user.username,
@@ -61,5 +69,38 @@ export class UserService {
       firstName: user.firstName,
       lastName: user.lastName,
     };
+  }
+
+  public async updateUser(
+    id: string,
+    image: Express.Multer.File,
+    input: UpdateUserRequest,
+  ): Promise<GetUserResponse> {
+    const user = await this.checkExistUser(id);
+
+    if (image) {
+      const imgName = withTimestamp(`${image.originalname}`);
+      const bucketName = process.env.BUCKET_NAME;
+      const imageUrl = await this.mediaService.upload(
+        imgName,
+        bucketName,
+        image.buffer,
+      );
+
+      input.avatar = imageUrl;
+    }
+    console.log(input);
+    return await this.userRepository.save({
+      id: user.id,
+      username: user.username,
+      password: user.password,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: user.username,
+      ...(image && { avatar: input.avatar }),
+      dob: input.dob,
+      address: input.address,
+      phone: input.phone,
+    });
   }
 }

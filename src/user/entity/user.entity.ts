@@ -22,6 +22,19 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  avatar?: string;
+
+  //date of birth
+  @Column({ nullable: true })
+  dob?: Date;
+
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  address?: string;
+
   @OneToMany(() => Project, (project) => project.createdBy, { cascade: true })
   ownerProject?: Project[];
 
