@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { getApps } from 'firebase-admin/app';
@@ -6,8 +7,7 @@ export class FirebaseService {
   private readonly storage: admin.storage.Storage;
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const serviceAccount = require('./task-management-43b18-firebase-adminsdk-4zoxg-e4adf7600c.json');
+    const serviceAccount = require('./../../src/task-management-43b18-firebase-adminsdk-4zoxg-e4adf7600c.json');
     if (!getApps().length) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
