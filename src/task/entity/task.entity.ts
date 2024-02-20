@@ -21,7 +21,7 @@ export class Task {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ type: 'longtext', nullable: true })
   description: string;
 
   @Column({ type: 'json', nullable: true })
