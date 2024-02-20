@@ -42,11 +42,10 @@ export class UserController {
   })
   async update(
     @Param('id') id,
-    @Body() input: UpdateUserRequest,
     @UploadedFile()
     image: Express.Multer.File,
+    @Body() input: UpdateUserRequest,
   ): Promise<GetUserResponse> {
-    console.log(image, 'image');
     return await this.userService.updateUser(id, image, input);
   }
 }

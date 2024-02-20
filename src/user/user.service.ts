@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GetUserResponse } from './dtos/create.user.dto';
 import { MediaService } from 'src/media/media.service';
 import { UpdateUserRequest } from './dtos/update.user.dto';
-import { withTimestamp } from 'src/utils/withTimestamp';
 @Injectable()
 export class UserService {
   constructor(
@@ -79,17 +78,10 @@ export class UserService {
     const user = await this.checkExistUser(id);
 
     if (image) {
-      const imgName = withTimestamp(`${image.originalname}`);
-      const bucketName = process.env.BUCKET_NAME;
-      const imageUrl = await this.mediaService.upload(
-        imgName,
-        bucketName,
-        image.buffer,
-      );
+      const imageUrl = await this.mediaService.upload(image);
 
       input.avatar = imageUrl;
     }
-    console.log(input);
     return await this.userRepository.save({
       id: user.id,
       username: user.username,

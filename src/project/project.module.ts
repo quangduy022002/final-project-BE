@@ -9,10 +9,17 @@ import { Section } from 'src/section/entity/section.entity';
 import { SectionService } from 'src/section/section.service';
 import { Task } from 'src/task/entity/task.entity';
 import { MediaService } from 'src/media/media.service';
+import { FirebaseService } from 'src/firebase/firebase.image.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Project, User, Section, Task])],
-  providers: [ProjectService, UserService, SectionService, MediaService],
+  providers: [
+    ProjectService,
+    UserService,
+    SectionService,
+    MediaService,
+    FirebaseService,
+  ],
   controllers: [ProjectController],
 })
 export class ProjectModule {}

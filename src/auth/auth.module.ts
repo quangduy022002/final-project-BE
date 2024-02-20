@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { MediaService } from 'src/media/media.service';
+import { FirebaseService } from 'src/firebase/firebase.image.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MediaService } from 'src/media/media.service';
     AuthService,
     UserService,
     MediaService,
+    FirebaseService,
   ],
   controllers: [AuthController],
 })

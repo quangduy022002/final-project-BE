@@ -1,57 +1,40 @@
-import { Storage } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
-import * as path from 'path';
-import { format } from 'util';
+import { FirebaseService } from 'src/firebase/firebase.image.service';
+import { withTimestamp } from 'src/utils/withTimestamp';
 
 @Injectable()
 export class MediaService {
-  storage: Storage;
-  constructor() {
-    this.storage = new Storage({
-      keyFilename: path.join(__dirname, '../../../ploggvn-95aadc5076fd.json'),
-      projectId: 'ploggvn',
+  constructor(private readonly firebaseService: FirebaseService) {}
+
+  async upload(file: any): Promise<string> {
+    const storage = this.firebaseService.getStorageInstance();
+    const bucket = storage.bucket();
+
+    const fileName = withTimestamp(file.originalname);
+    const fileUpload = bucket.file(fileName);
+
+    const stream = fileUpload.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
     });
-  }
 
-  async upload(
-    fileName: string,
-    bucketName: string,
-    buffer: Buffer,
-  ): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const bucket = this.storage.bucket('ploggvn.appspot.com');
-      const blob = bucket.file(fileName);
-      const blobStream = blob.createWriteStream({
-        resumable: false,
+    return new Promise((resolve, reject) => {
+      stream.on('error', (error) => {
+        reject(error);
       });
 
-      blobStream.on('error', (err) => {
-        reject(err);
+      stream.on('finish', async () => {
+        //make public
+        await fileUpload.makePublic();
+        const signedUrl = await fileUpload.getSignedUrl({
+          action: 'read',
+          expires: '03-01-2500',
+        });
+
+        resolve(signedUrl[0]);
       });
-
-      blobStream.on('finish', async () => {
-        const publicUrl = format(
-          `https://storage.googleapis.com/${bucket.name}/${blob.name}`,
-        );
-
-        try {
-          // Make the file public
-          await bucket.file(fileName).makePublic();
-        } catch (err) {
-          reject(err);
-        }
-
-        resolve(publicUrl);
-      });
-
-      blobStream.end(buffer);
+      stream.end(file.buffer);
     });
-  }
-
-  async download(name: string) {
-    return await this.storage
-      .bucket('ploggvn.appspot.com')
-      .file(name)
-      .download();
   }
 }

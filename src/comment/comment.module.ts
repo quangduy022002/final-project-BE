@@ -15,6 +15,7 @@ import { PriorityService } from 'src/priority/priority.service';
 import { Project } from 'src/project/entity/project.entity';
 import { ProjectService } from 'src/project/project.service';
 import { MediaService } from 'src/media/media.service';
+import { FirebaseService } from 'src/firebase/firebase.image.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MediaService } from 'src/media/media.service';
     PriorityService,
     ProjectService,
     MediaService,
+    FirebaseService,
   ],
 })
 export class CommentModule {}
