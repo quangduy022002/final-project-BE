@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy } from 'passport-local';
@@ -25,11 +21,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new BadRequestException('User not found !');
     }
 
     if (!(await bcrypt.compare(password, user.password))) {
-      throw new BadRequestException(['Wrong password!']);
+      throw new BadRequestException('Wrong password !');
     }
 
     return user;

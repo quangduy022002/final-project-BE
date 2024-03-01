@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ProjectService } from '../project.service';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
 import {
@@ -25,6 +25,7 @@ import {
 import { Project } from '../entity/project.entity';
 import { DeleteResult } from 'typeorm';
 
+@ApiTags('Project')
 @Controller('/projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}

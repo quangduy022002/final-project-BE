@@ -19,7 +19,9 @@ import {
 } from 'src/user/dtos/create.user.dto';
 import { EmailUserRequest } from 'src/user/dtos/email.user.dto';
 import { PasswordUserRequest } from 'src/user/dtos/password.user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -96,8 +98,8 @@ export class AuthController {
   }
 
   @Post('checkCode')
-  async checkCode(@Body() payload: CodeAuthRequest) {
-    return await this.authService.checkCode(payload.code);
+  checkCode(@Body() payload: CodeAuthRequest) {
+    return this.authService.checkCode(payload.code);
   }
 
   @Post('resetPassword')

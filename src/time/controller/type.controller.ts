@@ -9,12 +9,13 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateTypeRequest } from 'src/type/dtos/create.type.dto';
 import { Type } from 'src/type/entity/type.entity';
 import { TypeService } from 'src/type/type.service';
 import { DeleteResult } from 'typeorm';
 
+@ApiTags('Time')
 @Controller('/types')
 export class TypeController {
   constructor(private readonly typeService: TypeService) {}

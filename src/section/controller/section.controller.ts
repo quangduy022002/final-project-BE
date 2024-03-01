@@ -10,11 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { SectionService } from '../section.service';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateSectionRequest } from '../dtos/create.section.dto';
 import { Section } from '../entity/section.entity';
 import { DeleteResult } from 'typeorm';
 
+@ApiTags('Section')
 @Controller('/sections')
 export class SectionController {
   constructor(private readonly sectionService: SectionService) {}

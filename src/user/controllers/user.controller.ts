@@ -9,13 +9,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../user.service';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetUserResponse } from '../dtos/create.user.dto';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { UpdateUserRequest } from '../dtos/update.user.dto';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+@ApiTags('User')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

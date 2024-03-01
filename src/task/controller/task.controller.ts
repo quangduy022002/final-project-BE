@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { TaskService } from '../task.service';
 import { CreateTaskRequest, GetTaskResponse } from '../dtos/create.task.dto';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
@@ -19,6 +19,7 @@ import { AssignUserProjectRequest } from 'src/project/dtos/assign.user.project.d
 import { UpdateTaskRequest } from '../dtos/update.task.dto';
 import { Task } from '../entity/task.entity';
 
+@ApiTags('Task')
 @Controller('/tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}

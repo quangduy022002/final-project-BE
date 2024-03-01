@@ -51,7 +51,7 @@ export class AuthService {
     const mailOptions = {
       from: 'tambintv1@gmail.com',
       to: email,
-      subject: 'Sending new password for user',
+      subject: 'Sending a code for user',
       text: 'New message',
       html: `<p style="font-size: '20px'; font-weight: 600">Your code is: ${this.code}</p>`,
     };

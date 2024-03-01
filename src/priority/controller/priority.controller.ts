@@ -12,9 +12,10 @@ import {
 import { PriorityService } from '../priority.service';
 import { CreatePriorityRequest } from '../dtos/create.priority.dto';
 import { Priority } from '../entity/priority.entity';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 
+@ApiTags('Priority')
 @Controller('/priorities')
 export class PriorityController {
   constructor(private readonly priorityService: PriorityService) {}

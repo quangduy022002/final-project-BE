@@ -11,10 +11,11 @@ import {
 } from '@nestjs/common';
 import { TypeService } from '../type.service';
 import { Type } from '../entity/type.entity';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateTypeRequest } from '../dtos/create.type.dto';
 import { DeleteResult } from 'typeorm';
 
+@ApiTags('Type')
 @Controller('types')
 export class TypeController {
   constructor(private readonly typeService: TypeService) {}
