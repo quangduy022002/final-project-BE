@@ -49,6 +49,10 @@ export class UserService {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      dob: user.dob,
+      phone: user.phone,
+      address: user.address,
+      avatar: user.avatar,
     };
   }
 

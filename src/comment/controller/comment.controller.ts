@@ -18,10 +18,11 @@ import {
 } from '../dtos/create.comment.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entity/user.entity';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 
+@ApiTags('Comments')
 @Controller('/comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}

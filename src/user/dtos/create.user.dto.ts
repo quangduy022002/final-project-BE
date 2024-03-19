@@ -52,7 +52,7 @@ export class GetUserResponse {
   avatar?: string;
 
   //date of birth
-  dob?: Date;
+  dob?: string;
 
   phone?: string;
 

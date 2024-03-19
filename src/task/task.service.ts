@@ -147,7 +147,7 @@ export class TaskService {
   }
 
   public async getTaskDetail(id: string): Promise<GetTaskResponse> {
-    const query = await this.getTasksBaseQuery()
+    const query = this.getTasksBaseQuery()
       .leftJoin('e.createdBy', 'user')
       .leftJoin('e.project', 'project')
       .addSelect([

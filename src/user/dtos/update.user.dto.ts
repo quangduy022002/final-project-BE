@@ -1,4 +1,4 @@
-import { IsDate, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class UpdateUserRequest {
   @IsOptional()
@@ -10,8 +10,7 @@ export class UpdateUserRequest {
   lastName: string;
 
   @IsOptional()
-  @IsDate()
-  dob: Date;
+  dob: string;
 
   @IsOptional()
   @IsPhoneNumber()

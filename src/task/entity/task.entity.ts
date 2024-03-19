@@ -8,8 +8,8 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -39,7 +39,7 @@ export class Task {
   @Column({ type: 'json', nullable: true })
   teamUsers: User[];
 
-  @ManyToMany(() => Comment, (cmt) => cmt.task)
+  @OneToMany(() => Comment, (cmt) => cmt.task)
   comments: Comment[] | null;
 
   @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })

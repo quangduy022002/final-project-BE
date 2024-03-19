@@ -27,7 +27,7 @@ export class User {
 
   //date of birth
   @Column({ nullable: true })
-  dob?: Date;
+  dob?: string;
 
   @Column({ nullable: true })
   phone?: string;
