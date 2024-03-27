@@ -56,6 +56,31 @@ export class UserService {
     };
   }
 
+  public async getUserByUsername(
+    username: string,
+  ): Promise<GetUserResponse | undefined> {
+    const user = await this.userRepository.findOne({
+      where: {
+        username,
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.username,
+      dob: user.dob,
+      phone: user.phone,
+      address: user.address,
+      avatar: user.avatar,
+    };
+  }
+
   public async getUserByEmail(
     email: string,
   ): Promise<GetUserResponse | undefined> {

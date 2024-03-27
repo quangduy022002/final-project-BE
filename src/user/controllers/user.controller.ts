@@ -34,6 +34,16 @@ export class UserController {
     return await this.userService.getUser(id);
   }
 
+  @Get('username/:username')
+  @ApiParam({
+    name: 'username',
+  })
+  async getUserByUsername(
+    @Param('username') username,
+  ): Promise<GetUserResponse> {
+    return await this.userService.getUserByUsername(username);
+  }
+
   @Patch('update/:id')
   @UseInterceptors(FileInterceptor('image'))
   @UseGuards(AuthGuardJwt)

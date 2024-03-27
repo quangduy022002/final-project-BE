@@ -8,7 +8,7 @@ import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { ConfigModule } from '@nestjs/config';
 import { TaskModule } from './task/task.module';
-import ormConfigProd from './config/orm.config.prod';
+// import ormConfigProd from './config/orm.config.prod';
 import { PriorityModule } from './priority/priority.module';
 import { CommentModule } from './comment/comment.module';
 import { TypeModule } from './type/type.module';
@@ -23,8 +23,7 @@ import { MediaModule } from './media/media.module';
       expandVariables: true,
     }),
     TypeOrmModule.forRootAsync({
-      useFactory:
-        process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
+      useFactory: ormConfig,
     }),
     AuthModule,
     SectionModule,
