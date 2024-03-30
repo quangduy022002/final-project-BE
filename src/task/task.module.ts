@@ -16,6 +16,8 @@ import { ProjectService } from 'src/project/project.service';
 import { Comment } from 'src/comment/entity/comment.entity';
 import { MediaService } from 'src/media/media.service';
 import { FirebaseService } from 'src/firebase/firebase.image.service';
+import { TaskSchedulerService } from './task.schedule.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { FirebaseService } from 'src/firebase/firebase.image.service';
       Project,
       Comment,
     ]),
+    ScheduleModule.forRoot(),
   ],
   providers: [
     TaskService,
@@ -38,6 +41,7 @@ import { FirebaseService } from 'src/firebase/firebase.image.service';
     ProjectService,
     MediaService,
     FirebaseService,
+    TaskSchedulerService,
   ],
   controllers: [TaskController],
 })
