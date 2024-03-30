@@ -15,6 +15,7 @@ import { AssignUserProjectRequest } from 'src/project/dtos/assign.user.project.d
 import { Comment } from 'src/comment/entity/comment.entity';
 import { UpdateTaskRequest } from './dtos/update.task.dto';
 import { GetCommentResponse } from 'src/comment/dtos/create.comment.dto';
+import { formatDate } from 'src/utils/formatDate';
 
 @Injectable()
 export class TaskService {
@@ -179,6 +180,7 @@ export class TaskService {
       priority: task.priority,
       type: task.type,
       time: task.time,
+      deadline: task.deadline,
       teamUsers: task.teamUsers,
       comments,
       projectId: task.project.id,
@@ -225,6 +227,7 @@ export class TaskService {
       priority: task.priority,
       type: task.type,
       time: task.time,
+      deadline: task.deadline,
       teamUsers: task.teamUsers,
       projectId: project.id,
     };
@@ -257,6 +260,7 @@ export class TaskService {
       priority,
       type,
       time,
+      deadline: input.deadline,
       teamUsers,
       project,
     });
@@ -269,6 +273,7 @@ export class TaskService {
       priority: updatedTask.priority,
       type: updatedTask.type,
       time: updatedTask.time,
+      deadline: updatedTask.deadline,
       teamUsers: updatedTask.teamUsers,
       projectId: project.id,
     };
@@ -285,18 +290,28 @@ export class TaskService {
       this.updateTeamUser(task, member),
       this.projectService.getProjectDetail(task.projectId),
     ]);
-    const { id, name, description, status, priority, type, time, teamUsers } =
-      await this.taskRepository.save({
-        id: task.id,
-        name: task.name,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        type: task.type,
-        time: task.time,
-        project,
-        teamUsers: updatedTeamUsers,
-      });
+    const {
+      id,
+      name,
+      description,
+      status,
+      priority,
+      type,
+      time,
+      teamUsers,
+      deadline,
+    } = await this.taskRepository.save({
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      type: task.type,
+      time: task.time,
+      deadline: task.deadline,
+      project,
+      teamUsers: updatedTeamUsers,
+    });
     return {
       id,
       name,
@@ -305,6 +320,7 @@ export class TaskService {
       priority,
       type,
       time,
+      deadline,
       teamUsers,
       projectId: task.id,
     };
@@ -321,18 +337,28 @@ export class TaskService {
       this.updateTeamUser(task, member, 'remove'),
       this.projectService.getProjectDetail(task.projectId),
     ]);
-    const { id, name, description, status, priority, type, time, teamUsers } =
-      await this.taskRepository.save({
-        id: task.id,
-        name: task.name,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        type: task.type,
-        time: task.time,
-        project,
-        teamUsers: updatedTeamUsers,
-      });
+    const {
+      id,
+      name,
+      description,
+      status,
+      priority,
+      type,
+      time,
+      teamUsers,
+      deadline,
+    } = await this.taskRepository.save({
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      type: task.type,
+      time: task.time,
+      deadline: task.deadline,
+      project,
+      teamUsers: updatedTeamUsers,
+    });
     return {
       id,
       name,
@@ -341,6 +367,7 @@ export class TaskService {
       priority,
       type,
       time,
+      deadline,
       teamUsers,
       projectId: task.projectId,
     };
@@ -352,5 +379,25 @@ export class TaskService {
       .delete()
       .where('id = :id', { id })
       .execute();
+  }
+
+  async findTasksToSchedule(): Promise<Task[]> {
+    const currentTime = new Date();
+
+    const notificationThreshold = new Date(currentTime);
+    notificationThreshold.setHours(currentTime.getHours() + 24);
+    const deadline = formatDate(notificationThreshold);
+    const tasksToNotify = await this.taskRepository
+      .createQueryBuilder('e')
+      .where('e.deadline <= :deadline', {
+        deadline: deadline,
+      })
+      .getMany();
+
+    // const taskList = tasksToNotify.filter(
+    //   (task: Task) => task.deadline > deadline,
+    // );
+    // return taskList;
+    return tasksToNotify;
   }
 }

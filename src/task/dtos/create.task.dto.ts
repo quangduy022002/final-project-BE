@@ -29,6 +29,9 @@ export class CreateTaskRequest {
   teamUsers: string[];
 
   @IsNotEmpty()
+  deadline: string;
+
+  @IsNotEmpty()
   projectId: string;
 }
 export class GetTaskResponse {
@@ -47,6 +50,8 @@ export class GetTaskResponse {
   time: object;
 
   projectId: string;
+
+  deadline: string;
 
   teamUsers?: GetUserResponse[];
 

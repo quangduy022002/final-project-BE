@@ -36,6 +36,9 @@ export class Task {
   @Column({ type: 'json', nullable: true })
   time: object;
 
+  @Column({ nullable: true })
+  deadline: string;
+
   @Column({ type: 'json', nullable: true })
   teamUsers: User[];
 

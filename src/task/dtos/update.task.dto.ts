@@ -21,5 +21,8 @@ export class UpdateTaskRequest {
   estimateTime: number;
 
   @IsNotEmpty()
+  deadline: string;
+
+  @IsNotEmpty()
   teamUsers: string[];
 }
