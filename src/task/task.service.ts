@@ -385,19 +385,15 @@ export class TaskService {
     const currentTime = new Date();
 
     const notificationThreshold = new Date(currentTime);
-    notificationThreshold.setHours(currentTime.getHours() + 24);
+    notificationThreshold.setDate(currentTime.getDate() + 1);
     const deadline = formatDate(notificationThreshold);
+
     const tasksToNotify = await this.taskRepository
       .createQueryBuilder('e')
-      .where('e.deadline <= :deadline', {
-        deadline: deadline,
+      .where('e.deadline = :deadline', {
+        deadline,
       })
       .getMany();
-
-    // const taskList = tasksToNotify.filter(
-    //   (task: Task) => task.deadline > deadline,
-    // );
-    // return taskList;
     return tasksToNotify;
   }
 }

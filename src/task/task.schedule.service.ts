@@ -43,18 +43,16 @@ export class TaskSchedulerService {
     }
   }
 
-  //   @Cron(CronExpression.EVERY_DAY_AT_7AM)
-  //   @Cron('45 * * * * *')
+  @Cron(CronExpression.EVERY_DAY_AT_7AM)
+  // @Cron('* * * * * *')
   async handleTaskScheduling() {
     const tasksToNotify: Task[] = await this.taskService.findTasksToSchedule();
-    const data = await Promise.all(
+    await Promise.all(
       tasksToNotify.map((task: Task) => {
         task.teamUsers.forEach(async (user: User) => {
-          await this.sendNotification(user.email, task);
+          return await this.sendNotification(user.email, task);
         });
       }),
     );
-
-    console.log(data);
   }
 }
