@@ -44,6 +44,14 @@ export class UserController {
     return await this.userService.getUserByUsername(username);
   }
 
+  @Get('token/:token')
+  @ApiParam({
+    name: 'token',
+  })
+  async getUserByToken(@Param('token') token): Promise<GetUserResponse> {
+    return await this.userService.getUserByToken(token);
+  }
+
   @Patch('update/:id')
   @UseInterceptors(FileInterceptor('image'))
   @UseGuards(AuthGuardJwt)

@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GetUserResponse } from './dtos/create.user.dto';
 import { MediaService } from 'src/media/media.service';
 import { UpdateUserRequest } from './dtos/update.user.dto';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly mediaService: MediaService,
+    private readonly jwtService: JwtService,
   ) {}
 
   private getUsersBaseQuery() {
@@ -54,6 +56,15 @@ export class UserService {
       address: user.address,
       avatar: user.avatar,
     };
+  }
+
+  public async getUserByToken(
+    token: string,
+  ): Promise<GetUserResponse | undefined> {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.AUTH_SECRET,
+    });
+    return await this.getUser(payload.sub);
   }
 
   public async getUserByUsername(

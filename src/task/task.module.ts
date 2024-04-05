@@ -18,6 +18,7 @@ import { MediaService } from 'src/media/media.service';
 import { FirebaseService } from 'src/firebase/firebase.image.service';
 import { TaskSchedulerService } from './task.schedule.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     MediaService,
     FirebaseService,
     TaskSchedulerService,
+    JwtService,
   ],
   controllers: [TaskController],
 })
