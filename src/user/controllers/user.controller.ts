@@ -15,6 +15,8 @@ import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { UpdateUserRequest } from '../dtos/update.user.dto';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { User } from '../entity/user.entity';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 
 @ApiTags('User')
 @Controller('users')
@@ -44,12 +46,23 @@ export class UserController {
     return await this.userService.getUserByUsername(username);
   }
 
-  @Get('token/:token')
-  @ApiParam({
-    name: 'token',
-  })
-  async getUserByToken(@Param('token') token): Promise<GetUserResponse> {
-    return await this.userService.getUserByToken(token);
+  @Get('detail/information')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuardJwt)
+  async getUserByToken(
+    @CurrentUser() user: User,
+  ): Promise<GetUserResponse | User> {
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      dob: user.dob,
+      phone: user.phone,
+      address: user.address,
+      avatar: user.avatar,
+    };
   }
 
   @Patch('update/:id')
