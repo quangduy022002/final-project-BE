@@ -18,7 +18,7 @@ export class Project {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'longtext' })
   description: string;
 
   @Column()
