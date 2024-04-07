@@ -100,7 +100,9 @@ export class UserService {
         email,
       })
       .getOne();
-
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
     return {
       id: user.id,
       username: user.username,

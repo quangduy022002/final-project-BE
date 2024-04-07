@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class InviteUserProjectRequest {
   @IsString()
@@ -8,6 +8,9 @@ export class InviteUserProjectRequest {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @IsOptional()
+  message: string;
 }
 
 export class InviteUserProjectResponse {

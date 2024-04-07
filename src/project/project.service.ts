@@ -291,14 +291,6 @@ export class ProjectService {
     const member = await this.userService.getUserByEmail(payload.email);
     const project = await this.getProjectDetail(payload.projectId);
 
-    if (!project) {
-      throw new BadRequestException('Project not found');
-    }
-
-    if (!member) {
-      throw new BadRequestException('User not found');
-    }
-
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -312,11 +304,12 @@ export class ProjectService {
     // domain?projectId=""&email=""
     const mailOptions = {
       from: 'tambintv1@gmail.com',
-      to: payload.email,
+      to: member.email,
       subject: 'Invite user to project',
       text: 'New message',
       html: `<div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
                 <p style="font-size: '20px'; font-weight: 600;">Invite you to join ${project.name} project</p>
+                <p style="font-size: '16px'">${payload.message}</p>
                 <a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 5px;" 
                     href="https://www.google.com/" 
                     target="_blank"
