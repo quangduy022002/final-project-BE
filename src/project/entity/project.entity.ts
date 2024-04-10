@@ -5,8 +5,9 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
+  // ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -30,7 +31,7 @@ export class Project {
   @Column({ type: 'json', nullable: true })
   teamUsers: User[] | null;
 
-  @ManyToMany(() => Task, (task) => task.project, { cascade: true })
+  @OneToMany(() => Task, (task) => task.project, { cascade: true })
   @Column({ type: 'json', nullable: true })
   tasks?: Task[] | null;
 

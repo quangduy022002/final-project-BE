@@ -311,7 +311,7 @@ export class ProjectService {
                 <p style="font-size: '20px'; font-weight: 600;">Invite you to join ${project.name} project</p>
                 <p style="font-size: '16px'">${payload.message}</p>
                 <a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 5px;" 
-                    href="https://www.google.com/" 
+                    href="http://localhost:3000/project/accept?email=${member.email}&projectId=${project.id}" 
                     target="_blank"
                 >
                   Click here to join
@@ -334,7 +334,6 @@ export class ProjectService {
     const project = await this.getProjectDetail(payload.projectId);
 
     const updatedTeamUsers = await this.updateTeamUser(project, member);
-
     const updatedProject = await this.projectRepository.save({
       id: project.id,
       name: project.name,
