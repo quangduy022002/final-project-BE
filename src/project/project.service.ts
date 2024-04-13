@@ -349,4 +349,33 @@ export class ProjectService {
       status: true,
     };
   }
+
+  public async getListProjectByUser(user: User) {
+    const projects = await this.getProjectsBaseQuery()
+      .leftJoin('e.createdBy', 'user')
+      .addSelect([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+      ])
+      .getMany();
+
+    const result: Project[] = await Promise.all(
+      projects.map(async (project: Project) => {
+        const tasks = await this.getTaskListBaseQuery(project.id);
+        return {
+          ...project,
+          tasks,
+        };
+      }),
+    );
+    const list = result.filter(
+      (project: Project) =>
+        project.createdBy.id === user.id ||
+        project.teamUsers.some((member: User) => member.id === user.id),
+    );
+    return list;
+  }
 }

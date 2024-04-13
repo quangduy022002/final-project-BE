@@ -43,6 +43,13 @@ export class ProjectController {
     return await this.projectService.getProjectDetail(id);
   }
 
+  @Get('getAllByUser')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuardJwt)
+  async getList(@CurrentUser() user: User): Promise<Project[]> {
+    return await this.projectService.getListProjectByUser(user);
+  }
+
   @Post('create')
   @ApiBearerAuth()
   @UseGuards(AuthGuardJwt)
