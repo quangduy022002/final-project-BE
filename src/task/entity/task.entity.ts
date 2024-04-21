@@ -24,13 +24,16 @@ export class Task {
   @Column({ type: 'longtext', nullable: true })
   description: string;
 
-  @Column({ type: 'json', nullable: true })
+  @ManyToOne(() => Section, { nullable: true })
+  @JoinColumn()
   status: Section;
 
-  @Column({ type: 'json', nullable: true })
+  @ManyToOne(() => Priority, { nullable: true })
+  @JoinColumn()
   priority: Priority;
 
-  @Column({ type: 'json', nullable: true })
+  @ManyToOne(() => Type, { nullable: true })
+  @JoinColumn()
   type: Type;
 
   @Column({ type: 'json', nullable: true })

@@ -157,6 +157,7 @@ export class TaskService {
         'user.email',
         'user.firstName',
         'user.lastName',
+        'user.avatar',
         'project.id',
       ])
       .andWhere('e.id = :id', {
@@ -213,6 +214,7 @@ export class TaskService {
       priority,
       type,
       time,
+      deadline: input.deadline,
       teamUsers,
       comments: [],
       project,

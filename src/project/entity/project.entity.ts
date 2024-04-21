@@ -26,6 +26,7 @@ export class Project {
   category: string;
 
   @Column({ type: 'json', nullable: true })
+  // @OneToMany(() => Section, (section) => section.project)
   sections: Section[] | null;
 
   @Column({ type: 'json', nullable: true })
