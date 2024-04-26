@@ -47,6 +47,8 @@ export class GetTaskResponse {
 
   priority: Priority;
 
+  statusId?: string;
+
   time: object;
 
   projectId: string;

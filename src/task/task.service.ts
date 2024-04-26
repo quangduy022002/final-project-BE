@@ -150,6 +150,9 @@ export class TaskService {
   public async getTaskDetail(id: string): Promise<GetTaskResponse> {
     const query = this.getTasksBaseQuery()
       .leftJoin('e.createdBy', 'user')
+      .leftJoinAndSelect('e.status', 'status')
+      .leftJoinAndSelect('e.priority', 'priority')
+      .leftJoinAndSelect('e.type', 'type')
       .leftJoin('e.project', 'project')
       .addSelect([
         'user.id',
@@ -220,7 +223,6 @@ export class TaskService {
       project,
       createdBy: userInfo,
     });
-
     return {
       id: task.id,
       name: task.name,

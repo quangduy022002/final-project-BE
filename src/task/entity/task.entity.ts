@@ -24,15 +24,15 @@ export class Task {
   @Column({ type: 'longtext', nullable: true })
   description: string;
 
-  @ManyToOne(() => Section, { nullable: true })
-  @JoinColumn()
+  @ManyToOne(() => Section, (task) => task.tasks, { nullable: true })
+  @JoinColumn({ name: 'status' })
   status: Section;
 
-  @ManyToOne(() => Priority, { nullable: true })
+  @ManyToOne(() => Priority, (priority) => priority.tasks, { nullable: true })
   @JoinColumn()
   priority: Priority;
 
-  @ManyToOne(() => Type, { nullable: true })
+  @ManyToOne(() => Type, (type) => type.tasks, { nullable: true })
   @JoinColumn()
   type: Type;
 
