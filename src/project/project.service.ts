@@ -86,6 +86,8 @@ export class ProjectService {
       .createQueryBuilder('e')
       .orderBy('e.id', 'DESC')
       .leftJoinAndSelect('e.status', 'status')
+      .leftJoinAndSelect('e.priority', 'priority')
+      .leftJoinAndSelect('e.comments', 'comments')
       .leftJoin('e.createdBy', 'user')
       .leftJoin('e.project', 'project')
       .addSelect([

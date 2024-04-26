@@ -29,7 +29,7 @@ export class Task {
   status: Section;
 
   @ManyToOne(() => Priority, (priority) => priority.tasks, { nullable: true })
-  @JoinColumn()
+  @JoinColumn({ name: 'priority' })
   priority: Priority;
 
   @ManyToOne(() => Type, (type) => type.tasks, { nullable: true })
@@ -46,6 +46,7 @@ export class Task {
   teamUsers: User[];
 
   @OneToMany(() => Comment, (cmt) => cmt.task)
+  @JoinColumn({ name: 'comments' })
   comments: Comment[] | null;
 
   @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })
