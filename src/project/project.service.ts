@@ -85,6 +85,7 @@ export class ProjectService {
     return this.taskRepository
       .createQueryBuilder('e')
       .orderBy('e.id', 'DESC')
+      .leftJoinAndSelect('e.status', 'status')
       .leftJoin('e.createdBy', 'user')
       .leftJoin('e.project', 'project')
       .addSelect([
